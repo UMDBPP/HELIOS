@@ -18,6 +18,7 @@ Adafruit_GPS GPS(&GPSSerial);
 #define SSC_MAX 0x3fff       // 2^14 - 1
 #define PRESSURE_MIN 0.0        // Min is 0 for sensors that give absolute values
 #define PRESSURE_MAX 206842.7   // Max presure of the 30psi for this sensor converted to Pascals
+#define HEADER_STRING "Year,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,Valve_Open,Valve_Closed"
 
 struct PRESSURE_SENSOR{
   float pressure;
@@ -82,6 +83,7 @@ PRESSURE_SENSOR pressures[2];
 //For GPS
 MY_GPS gpsData = {};
 boolean usingInterrupt = false;
+uint32_t timer = millis();
 
 void setup() {
   //Wait half a second
@@ -121,8 +123,10 @@ void setup() {
   //Write "Starting" on the SD card
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
   if (dataFile) {// if the file is available, write to it:
-    dataFile.println("Starting: ");
-    Serial.println("Starting: ");
+    dataFile.println("Starting:");
+    dataFile.println(HEADER_STRING);
+    Serial.println("Starting:");
+    Serial.println(HEADER_STRING);
     dataFile.close();
   }
   else { // if the file isn't open, pop up an error:
@@ -137,8 +141,6 @@ void setup() {
   //GPSSerial.println(PMTK_Q_RELEASE);  // Ask for firmware version
   //useInterrupt(true);
 }
-
-uint32_t timer = millis();
 
 void loop() {
   // read data from the GPS in the 'main loop'
@@ -160,26 +162,27 @@ void loop() {
     if (millis() - timer > 1000) {
       timer = millis(); 
       writeLog();
+      //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for TIME_OPEN seconds
+      if(!valve_already_closed){//if the valve has not already been opened and closed
+        if(gpsData.altitude > ALTITUDE_TO_OPEN){
+          valve_counter++;//add to the altitude verifier
+        }
+        if(valve_counter >= NUM_OF_CHECKS && !valve_open){//if it is time to open the valve
+          valveOpen();//this causes a 3 second delay where no data is taken.
+          fanOn();
+          valve_time_at_open = millis();
+          valve_open=1;
+        }
+        else if(millis() > (valve_time_at_open + TIME_OPEN)){//if we've been open long enough
+          valve_already_closed=1;
+          fanOff();
+          valveClose();
+        }
+      }
     }
   }
   
-  //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for TIME_OPEN seconds
-  if(!valve_already_closed){//if the valve has not already been opened and closed
-    if(millis() > 30000){//gpsData.altitude > ALTITUDE_TO_OPEN){
-      valve_counter++;//add to the altitude verifier
-    }
-    if(valve_counter >= NUM_OF_CHECKS && !valve_open){//if it is time to open the valve
-      valveOpen();//this causes a 3 second delay where no data is taken.
-      fanOn();
-      valve_time_at_open = millis();
-      valve_open=1;
-    }
-    else if(millis() > (valve_time_at_open + TIME_OPEN)){//if we've been open long enough
-      valve_already_closed=1;
-      fanOff();
-      valveClose();
-    }
-  }
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -238,19 +241,21 @@ void writeLog(void){
   String dataString = "";
   dataString += (String)millis() + ",";
 
+  dataString += (String)gpsData.year + ",";
+  dataString += (String)gpsData.month + ","; 
+  dataString += (String)gpsData.day + ",";
   dataString += (String)gpsData.hour + ",";
   dataString += (String)GPS.minute + ",";
   dataString += (String)gpsData.second + ",";
   dataString += (String)gpsData.millisecond + ",";
-  dataString += (String)gpsData.day + ",";
-  dataString += (String)gpsData.month + ",";
-  dataString += (String)gpsData.year + ",";
+  
   dataString += (String)gpsData.latitude_deg + ",";
   dataString += (String)gpsData.latitude_min + ",";
   dataString += (String)gpsData.latitude_dir + ",";
   dataString += (String)gpsData.longitude_deg + ",";
   dataString += (String)gpsData.longitude_min + ",";
   dataString += (String)gpsData.longitude_dir + ",";
+  
   dataString += (String)gpsData.velocity + ",";
   dataString += (String)gpsData.angle + ",";
   dataString += (String)gpsData.altitude + ",";
@@ -269,7 +274,7 @@ void writeLog(void){
   dataString += (String)pressures[1].rawTemperature + ",";
 
   dataString += (String)valve_open + ",";
-  dataString += (String)valve_already_closed + ",";
+  dataString += (String)valve_already_closed;
   
   writeSD(dataString);
 }
@@ -328,4 +333,3 @@ void fanOff(void){//turns fan off
   digitalWrite(PIN_MOTOR_B, LOW);
   analogWrite(PIN_MOTOR_PWM, 0);
 }
-
