@@ -1,0 +1,29 @@
+TELEMETRY HELIOS TLM_PKT BIG_ENDIAN "Helios Telemetry"
+  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 810} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>
+  APPEND_ITEM Number 16 UINT "Transmission Number"
+  APPEND_ITEM Altitude 32 INT "Current Altitude"
+	UNITS Meter m
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM AscVelocity 32 FLOAT "Last Ascent Velocity"
+	UNITS MeterPerSecond m/s
+	FORMAT_STRING "%0.6f"
+    
+TELEMETRY HELIOS CONF_PKT BIG_ENDIAN "Helios Valve Confirmation"
+  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 850} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>
+  APPEND_ITEM Number 16 UINT "Transmission Number"
+  APPEND_ITEM Time 32 INT "Time Open"
+	UNITS milliSecond ms
+	FORMAT_STRING "%0.6f"
+	
+TELEMETRY HELIOS ERROR_PKT BIG_ENDIAN "Helios Error Notice"
+  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 890} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>
+  APPEND_ITEM Number 16 UINT "Transmission Number"
+  APPEND_ITEM Code 8 UINT "Error Code"
+    STATE NO_BYTES 1
+	STATE UNEQUAL_BYTES 2
+    STATE BAD_APID 3
+    STATE NOT_CMD 4
+    STATE BAD_CHECKSUM 5
