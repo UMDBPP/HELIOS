@@ -1,31 +1,78 @@
 #include <Wire.h> //Needed for I2C
-#include "hsc_ssc_i2c.h" //Needed for Honeywell Pressure Sensor
 #include <SPI.h> //SD
 #include <SD.h> //SD-> ~5250 bytes Storage and ~800 bytes global variables
 #include <Adafruit_GPS.h>
+#include<Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+#include <Adafruit_NeoPixel.h>
 
 //GPS hardware serial startup
 #define GPSSerial Serial1
 Adafruit_GPS GPS(&GPSSerial);
 #define GPSECHO false
 
-// see hsc_ssc_i2c.h for a description of these values
-// these defaults are found in the Honeywell SSC Datasheet and Honeywell I2C
-
+//Honeywell sensor values
 #define SSC_ADDR 0x28      // Address of the sensor, not needed while using the multiplexer
 #define MULTI_ADDR 0x70            // Address of the multiplexer
 #define SSC_MIN 0            // Minimum pressure the sensor detects
 #define SSC_MAX 0x3fff       // 2^14 - 1
 #define PRESSURE_MIN 0.0        // Min is 0 for sensors that give absolute values
 #define PRESSURE_MAX 206842.7   // Max presure of the 30psi for this sensor converted to Pascals
+
+//BME280 Values
+#define SEALEVELPRESSURE_HPA (1013.25)
+
+//Trinket Values
+#define TRINKET_ADDR 9
+#define vCounts 10  //the number of counts we wait to get a more accurate average altitude
+#define XBEE_WAIT_TIME 5000   //the wait time to receive commands; I built this in so that we cannot receive duplicate commands
+
+//First line printed identifies order of data
 #define HEADER_STRING "Year,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,Valve_Open,Valve_Closed"
 
-struct PRESSURE_SENSOR{
+//Control Parameters
+#define MOTOR_SPEED 255 //PWM oscillation between 0 and 255
+#define VALVE_MOVE_TIME 9000 //milliseconds
+#define ALTITUDE_TO_OPEN 20000 //meters
+uint32_t TIME_OPEN = 100000; //milliseconds
+#define NUM_OF_CHECKS 40 //the number of times the GPS must confirm altitude to open the valve (2 minutes)
+#define SD_CHIP_SELECT 4        // This is the Chip Select for the adafruit feather
+#define INSIDE_SENSOR 0 //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
+#define OUTSIDE_SENSOR 1  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
+#define FREQUENCY 500 //time in milliseconds between logging
+
+//Pin Numbers
+#define PIN_ACTUATOR_A 13 // Turning PIN_A high will make the actuator extend
+#define PIN_ACTUATOR_B 12
+#define PIN_ACTUATOR_PWM 11
+#define PIN_ACTUATOR_READ A6
+#define PIN_MOTOR_A 10 //Turning PIN_A high will make the motor blow forwards
+#define PIN_MOTOR_B 9
+#define PIN_MOTOR_PWM 6
+#define PIN_LED A0
+#define PIN_TRINKET_IN A1  //When this pin goes high, the arduino knows that there is data from the xbee waiting
+
+//LED Setup
+Adafruit_NeoPixel led = Adafruit_NeoPixel(1, PIN_LED, NEO_RGB + NEO_KHZ800);
+const uint32_t off = led.Color(0,0,0);
+const uint32_t blue = led.Color(0,0,255);
+const uint32_t green = led.Color(0,255,0);
+const uint32_t red = led.Color(255,0,0);
+
+//Data structures
+struct MY_HONEYWELL{
   float pressure;
   float temperature;
   uint8_t status;
   uint16_t rawPressure;
   uint16_t rawTemperature;
+};
+
+struct MY_BME{
+  uint32_t pressure;
+  float temperature;
+  float humidity;
+  int32_t altitude;
 };
 
 struct MY_GPS{
@@ -45,51 +92,55 @@ struct MY_GPS{
   char longitude_dir;//W/E
   float velocity;//knots
   float angle;//direction gps thinks we're moving
-  int32_t altitude;//meters
+  int32_t altitude=-1;//meters
   uint8_t satellites;//number of satellites
 };
 
-//Pin Numbers
-const int PIN_ACTUATOR_A = 13;
-const int PIN_ACTUATOR_B = 12;
-const int PIN_ACTUATOR_PWM = 11;
-const int PIN_MOTOR_A = 10;
-const int PIN_MOTOR_B = 9;
-const int PIN_MOTOR_PWM = 6;
-const int PIN_LED_DATA = 8;
-
-//Control Parameters
-const uint8_t MOTOR_SPEED = 255; //PWN oscillation between 0 and 255
-const uint16_t VALVE_TIMER = 9000; //milliseconds
-const uint16_t ALTITUDE_TO_OPEN = 20000;
-const uint64_t TIME_TO_OPEN = 2100000; //miliseconds
-const uint32_t TIME_OPEN = 100000; //miliseconds defalut 100000 milliseconds
-const uint8_t NUM_OF_CHECKS = 40; //the number of times the GPS must confirm altitude to open the valve (2 minutes)
-const uint8_t CHIP_SELECT = 4;        // This is the Chip Select for the adafruit feather
-const byte INSIDE_SENSOR = 0; //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
-const byte OUTSIDE_SENSOR = 1;  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
-
 //Global Variables
-
 //For Valve
 unsigned long valve_time_at_open = 400000000; //must be large, does not have to be that <<<
 uint8_t valve_counter=0;
 boolean valve_open=0;
 boolean valve_already_closed=0;
+float actuator_pos=0; //mm
+boolean valveState = 0; //true for open, false for closed
 
-//For Pressure
-PRESSURE_SENSOR pressures[2];
+//For communication
+float ascentVelocity = -2.0;
+int32_t oldAltitude = 0;
+unsigned long oldTime = 0;
+uint8_t counter = 0;
+boolean command = 0;
+
+//For Honeywell
+MY_HONEYWELL honeywells[2];
+
+//For BME280s
+Adafruit_BME280 bme[3];
+MY_BME bmeData[3];
 
 //For GPS
 MY_GPS gpsData = {};
 boolean usingInterrupt = false;
 uint32_t timer = millis();
 
+/////////////////////////////////////////////////////
+/*
+ * To Do:
+ * xxxProgram LED
+ * Program Xbee
+ * Program BME280
+ * xxxEnsure valve works as desired
+ * xxxLogging every half second - make this a variable
+ */
+
+//one of the most important things to test will be how the valve works without limit switches
+//Normal startup sequence is blue --> green --> blinking green --> solid green --> off.
 void setup() {
   //Wait half a second
   delay(500);
   Serial.begin(115200);
-
+  
   //Start acutator and motor pins
   pinMode(PIN_ACTUATOR_A, OUTPUT);
   pinMode(PIN_ACTUATOR_B, OUTPUT);
@@ -97,25 +148,54 @@ void setup() {
   pinMode(PIN_MOTOR_A, OUTPUT);
   pinMode(PIN_MOTOR_B, OUTPUT);
   pinMode(PIN_MOTOR_PWM, OUTPUT);
+  pinMode(PIN_TRINKET_IN, INPUT);
 
+  led.begin();
+  led.show(); //initialize the status led
+  led.setPixelColor(0, blue);
+  led.show(); //blue led means the code has just started and the valve is opening
+  
   //open valve & close valve
   valveOpen();
-  delay(1000);
+  delay(5000);
   valveClose();
+  while(actuator_pos < 49.0) //wait for the valve to close, then turn it off
+    actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
+  valveOff();
+
+  //Initialize I2C
+  Wire.begin();
+  if (digitalRead(PIN_TRINKET_IN)){
+    led.setPixelColor(0, red);
+    led.show();
+    delay(5000); //if the trinker thinks something is wrong, turn the led red
+  }
+  sendData(); //send the data stream {-1 -2} to confirm xbee functionality 
+  for (int i=0; i<10; i++){
+      led.setPixelColor(0, off);
+      led.show();
+      delay(500);
+      led.setPixelColor(0, blue);
+      led.show();
+      delay(500); //led blinks blue to confirm it has communicated with the trinket; at this point, check that xbee has sent data
+  }
+  
+  led.setPixelColor(0, green);
+  led.show(); //green indicates that the valve should be closed.
 
   //Turn fan on and off
   fanOn();
   delay(2000);
   fanOff();
   
-  //Wire setup for use of the Mulitplexer
-  Wire.begin();
-  
   //Begin logging data to SD Card
   Serial.print("\n\nInitializing SD card...");
-  if (!SD.begin(CHIP_SELECT)) { // see if the card is present and can be initialized:
+  if (!SD.begin(SD_CHIP_SELECT)) { // see if the card is present and can be initialized:
     Serial.println("Card failed, or not present");
     // don't do anything more:
+    led.setPixelColor(0, red);
+    led.show(); //red indicates an error
+    delay(5000);
     return;
   }
   Serial.println("card initialized.");
@@ -131,6 +211,19 @@ void setup() {
   }
   else { // if the file isn't open, pop up an error:
     Serial.println("error opening datalog.txt");
+    led.setPixelColor(0, red);
+    led.show(); //red indicates an error
+    delay(5000);
+  }
+
+  for (int i=0; i<3; i++){
+    tcaselect(i+2);
+    if (!bme[i].begin()) {  
+      Serial.println("Could not find a valid BME280 sensor, check wiring!");
+      led.setPixelColor(0, red);
+      led.show(); //red indicates an error
+      delay(5000);
+    }
   }
 
   //GPS startup
@@ -140,6 +233,17 @@ void setup() {
   //GPS.sendCommand(PGCMD_ANTENNA); // Request updates on antenna status, comment out to keep quiet
   //GPSSerial.println(PMTK_Q_RELEASE);  // Ask for firmware version
   //useInterrupt(true);
+
+  //implement something to check that all the pressure sensors are recording the correct data
+  
+  for (int i=0; i<10; i++){
+    led.setPixelColor(0, off);
+    led.show();
+    delay(500);
+    led.setPixelColor(0, green);
+    led.show();
+    delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
+  }
 }
 
 void loop() {
@@ -157,11 +261,60 @@ void loop() {
     if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
       return; // we can fail to parse a sentence in which case we should just wait for another
     recordGPS();
-    getPressure(0);
-    getPressure(1);
-    if (millis() - timer > 1000) {
+    if (gpsData.fix){
+      led.setPixelColor(0, off); //led turns off once we have a gps fix
+      led.show();
+    }
+    getHoneywell(0);
+    getHoneywell(1);
+    getBME(2);
+    getBME(3);
+    getBME(4);
+    actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
+    if (valveState && actuator_pos < 1.0) //if valve has finished opening, turn it off
+      valveOff();
+    if (!valveState && actuator_pos > 49.0) //if valve has finished closing, turn it off
+      valveOff();
+    if (digitalRead(PIN_TRINKET_IN) && abs(millis() - valve_time_at_open) > XBEE_WAIT_TIME){
+      Wire.requestFrom(TRINKET_ADDR, 5);
+      boolean toOpen = Wire.read();
+      byte commandData[4] = {0};
+      for (int i=0; i<4; i++)
+        commandData[i] = Wire.read();
+      uint32_t commandTime = *(uint32_t*)&commandData;
+      if (toOpen){ //doing this check is sort of unneeded, but seems like a logical safety
+        valve_already_closed = 0;
+        valve_open = 0; //these two lines reset the valve tracker to think that it is okay to open again
+        valve_counter = NUM_OF_CHECKS; //makes the valve open immediately without checking the altitude
+        TIME_OPEN = commandTime; //assign a new amount of time to open
+        if (commandTime == 0){//if we have been commanded to not open the valve at all
+          valve_open = 1;
+          valve_time_at_open = 0; //this tricks the valve into thinking it has already been opened, so it forces itself closed
+          TIME_OPEN = 1; //in this case, I opted to send 1 instead of zero so the user can be sure it is not blank data
+        }
+        else if (commandTime == 100){
+          valveOpen();
+          fanBack();
+          TIME_OPEN = 120001;
+          valve_open = 1;
+          valve_time_at_open = millis();
+        }
+        sendCommand(1);
+      }
+      else
+        sendCommand(0);
+    }
+    if (millis() - timer > FREQUENCY) {
       timer = millis(); 
       writeLog();
+      counter++;
+      if (counter == vCounts){ //send data less frequently to the trinket
+        ascentVelocity = 1.0*(gpsData.altitude - oldAltitude)/(millis() - oldTime);
+        oldTime = millis();
+        oldAltitude = gpsData.altitude;
+        counter = 0;
+        sendData();
+      }
       //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for TIME_OPEN seconds
       if(!valve_already_closed){//if the valve has not already been opened and closed
         if(gpsData.altitude > ALTITUDE_TO_OPEN){
@@ -195,6 +348,7 @@ void recordGPS(){
   gpsData.day = GPS.day;
   gpsData.month = GPS.month;
   gpsData.year = 2000+GPS.year;
+  gpsData.fix = GPS.fix;
   if(GPS.fix){
     gpsData.latitude_deg = GPS.latitude/100;
     gpsData.latitude_min = GPS.latitude- 100*gpsData.latitude_deg;
@@ -209,24 +363,35 @@ void recordGPS(){
   }
 }
 
-void getPressure(uint8_t sensor)
-{
+void getHoneywell(uint8_t sensor){
   tcaselect(sensor); //select to talk to the desired sensor
-  struct cs_raw ps; //declare variable for raw data 
-  uint8_t el; //location for status vairable
-  float p, t; //location for converted variables before storage
-  el = ps_get_raw(SSC_ADDR, &ps); //get status and data
-  if ( el == 4 ) {  //if sensor missing
-    pressures[sensor].pressure = -1;
-    pressures[sensor].temperature = -1;
-  } else {
-    pressures[sensor].status = ps.status;
-    pressures[sensor].rawPressure = ps.bridge_data;
-    pressures[sensor].rawTemperature = ps.temperature_data;
-    ps_convert(ps, &p, &t, SSC_MIN, SSC_MAX, PRESSURE_MIN, PRESSURE_MAX); //convert raw data
-    pressures[sensor].pressure = p;
-    pressures[sensor].temperature = t;
+  uint8_t val[4] = {0};  //four bytes to store sensor data
+  Wire.requestFrom(SSC_ADDR, (uint8_t) 4);    //request sensor data
+  for (uint8_t i = 0; i <= 3; i++) {
+      delay(4);                        // sensor might be missing, do not block by using Wire.available()
+      val[i] = Wire.read();
   }
+  honeywells[sensor].status = (val[0] & 0xc0) >> 6; // first 2 bits from first byte are the status
+  honeywells[sensor].rawPressure = ((val[0] & 0x3f) << 8) + val[1];
+  honeywells[sensor].rawTemperature = ((val[2] << 8) + (val[3] & 0xe0)) >> 5;
+  if (honeywells[sensor].rawTemperature == 65535)
+      honeywells[sensor].status = 4;
+  if (honeywells[sensor].status == 4){
+    honeywells[sensor].pressure = -1;
+    honeywells[sensor].temperature = -1;
+  }
+  else{
+    honeywells[sensor].pressure = 1.0 * (honeywells[sensor].rawPressure - SSC_MIN) * (PRESSURE_MAX - PRESSURE_MIN) / (SSC_MAX - SSC_MIN) + PRESSURE_MIN;
+    honeywells[sensor].temperature = (honeywells[sensor].rawTemperature * 0.0977) - 50;
+  }
+}
+
+void getBME(uint8_t sensor){
+  tcaselect(sensor);
+  bmeData[sensor-2].pressure = bme[sensor-2].readPressure();
+  bmeData[sensor-2].temperature = bme[sensor-2].readTemperature();
+  bmeData[sensor-2].humidity = bme[sensor-2].readHumidity();
+  bmeData[sensor-2].altitude = bme[sensor-2].readAltitude(SEALEVELPRESSURE_HPA);
 }
 
 void tcaselect(uint8_t i) {//selects which pressure sensor we're talking to with the I2C multiplexer
@@ -248,6 +413,7 @@ void writeLog(void){
   dataString += (String)GPS.minute + ",";
   dataString += (String)gpsData.second + ",";
   dataString += (String)gpsData.millisecond + ",";
+  dataString += (String)gpsData.fix + ",";
   
   dataString += (String)gpsData.latitude_deg + ",";
   dataString += (String)gpsData.latitude_min + ",";
@@ -261,19 +427,35 @@ void writeLog(void){
   dataString += (String)gpsData.altitude + ",";
   dataString += (String)gpsData.satellites + ",";
   
-  dataString += (String)pressures[0].pressure + ",";
-  dataString += (String)pressures[0].temperature + ",";
-  dataString += (String)pressures[0].status + ",";
-  dataString += (String)pressures[0].rawPressure + ",";
-  dataString += (String)pressures[0].rawTemperature + ",";
+  dataString += (String)honeywells[0].pressure + ",";
+  dataString += (String)honeywells[0].temperature + ",";
+  dataString += (String)honeywells[0].status + ",";
+  dataString += (String)honeywells[0].rawPressure + ",";
+  dataString += (String)honeywells[0].rawTemperature + ",";
 
-  dataString += (String)pressures[1].pressure + ",";
-  dataString += (String)pressures[1].temperature + ",";
-  dataString += (String)pressures[1].status + ",";
-  dataString += (String)pressures[1].rawPressure + ",";
-  dataString += (String)pressures[1].rawTemperature + ",";
+  dataString += (String)honeywells[1].pressure + ",";
+  dataString += (String)honeywells[1].temperature + ",";
+  dataString += (String)honeywells[1].status + ",";
+  dataString += (String)honeywells[1].rawPressure + ",";
+  dataString += (String)honeywells[1].rawTemperature + ",";
 
+  dataString += (String)bmeData[0].pressure + ",";
+  dataString += (String)bmeData[0].temperature + ",";
+  dataString += (String)bmeData[0].humidity + ",";
+  dataString += (String)bmeData[0].altitude + ",";
+
+  dataString += (String)bmeData[1].pressure + ",";
+  dataString += (String)bmeData[1].temperature + ",";
+  dataString += (String)bmeData[1].humidity + ",";
+  dataString += (String)bmeData[1].altitude + ",";
+
+  dataString += (String)bmeData[2].pressure + ",";
+  dataString += (String)bmeData[2].temperature + ",";
+  dataString += (String)bmeData[2].humidity + ",";
+  dataString += (String)bmeData[2].altitude + ",";
+  
   dataString += (String)valve_open + ",";
+  dataString += (String)actuator_pos + ",";
   dataString += (String)valve_already_closed;
   
   writeSD(dataString);
@@ -300,8 +482,7 @@ void valveOpen(void){//opens the valve by retracting the piston
   digitalWrite(PIN_ACTUATOR_A, HIGH);
   digitalWrite(PIN_ACTUATOR_B, LOW);
   digitalWrite(PIN_ACTUATOR_PWM, HIGH);
-  delay(VALVE_TIMER);
-  valveOff();
+  valveState = 1;
 }
 
 void valveClose(void){//closes the valve by extending the piston
@@ -309,8 +490,7 @@ void valveClose(void){//closes the valve by extending the piston
   digitalWrite(PIN_ACTUATOR_A, LOW);
   digitalWrite(PIN_ACTUATOR_B, HIGH);
   digitalWrite(PIN_ACTUATOR_PWM, HIGH);
-  delay(VALVE_TIMER);
-  valveOff();
+  valveState = 0;
 }
 
 void valveOff(void){//puts zero voltage on each side of valve
@@ -327,9 +507,58 @@ void fanOn(void){//turns fan on to prespecified speed
   analogWrite(PIN_MOTOR_PWM, MOTOR_SPEED);
 }
 
+void fanBack(void){//turns fan on to prespecified speed
+  Serial.println("Turning fan on");
+  digitalWrite(PIN_MOTOR_A, LOW);
+  digitalWrite(PIN_MOTOR_B, HIGH);
+  analogWrite(PIN_MOTOR_PWM, MOTOR_SPEED);
+}
+
 void fanOff(void){//turns fan off
   Serial.println("Turning fan off");
   digitalWrite(PIN_MOTOR_A, LOW);
   digitalWrite(PIN_MOTOR_B, LOW);
   analogWrite(PIN_MOTOR_PWM, 0);
 }
+
+void sendCommand(boolean opened){
+  if (!opened){ //if unsuccessful, write normal data
+    union {
+      float f;
+      byte bytes[4];
+    } u;
+    u.f = ascentVelocity; //used to convert float to bytes which can be sent
+    Wire.beginTransmission(TRINKET_ADDR);
+    Wire.write(1);
+    Wire.write(gpsData.altitude);
+    for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
+    Wire.endTransmission();
+  }
+  else{ //if successful, write the data received
+    union {
+      float f;
+      byte bytes[4];
+    } u;
+    u.f = 0.0;
+    Wire.beginTransmission(TRINKET_ADDR);
+    Wire.write(1);
+    Wire.write(TIME_OPEN);
+    for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
+    Wire.endTransmission();
+  }
+  delay(200); //we want the trinket to process the command before we move on
+}
+
+void sendData(){
+  union {
+    float f;
+    byte bytes[4];
+  } u;
+  u.f = ascentVelocity;
+  Wire.beginTransmission(TRINKET_ADDR);
+  Wire.write(0);
+  Wire.write(gpsData.altitude);
+  for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
+  Wire.endTransmission();
+}
+
