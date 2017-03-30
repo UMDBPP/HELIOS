@@ -2,14 +2,14 @@
 
 //I2C configuration
 #define TRINKET_ADDR 9
-#define M0_ADDR 8
-#define PIN_M0_OUT 3
+//#define M0_ADDR 8
+#define PIN_M0_OUT 8
 
 //Xbee configuration
 #define _NO_RTC_
 #define PKT_MAX_LEN 100
-#define XBEE_WRITE_ADDR 0x0003
-#define XBEE_THIS_ADDR 0x0005
+#define XBEE_WRITE_ADDR 0x0002
+#define XBEE_THIS_ADDR 0x0008
 #define XBee_PAN_ID 0x0B0B
 #define AP_ID_CMD 800   //the AP_ID that we must see whenever we receive a packet
 #define AP_ID_TLM 810   //the AP_ID that will be used to send all telemetry packets
@@ -23,8 +23,8 @@ uint16_t numTries = 0; //number of transmissions we have made since startup
 
 int32_t altitude; //last altitude in meters
 float ascentVelocity; //last speed
-uint32_t timeOpen;
-boolean valveOpen = 0;
+uint32_t timeOpen=0;
+uint8_t valveOpen = 0;
 
 //This program will only receive single byte command packets and send eight byte telemetry packets. All other xbee operatiosn are unused.
 
@@ -45,6 +45,8 @@ void setup(){
     Serial.println(initstat);
     digitalWrite(PIN_M0_OUT, HIGH); //tell the m0 that we have a problem so that it can alert the user via the status led
   }
+  
+  digitalWrite(PIN_M0_OUT, HIGH);
 }
 
 void loop(){
@@ -162,11 +164,12 @@ void packet_processing(uint8_t Pkt_Buff[]){
   uint8_t command = getCmdFunctionCode(Pkt_Buff);
   if (command == 0){ //this is the receive telemetry command
     sendXbee(); //send the most recent data
+    //digitalWrite(PIN_M0_OUT, HIGH);
   } else if (command == 1){ //this is the abort command
     valveOpen = 1;
     timeOpen = 0;
     digitalWrite(PIN_M0_OUT, HIGH); //writing this high will cause the m0 to trigger the xbee to send data
-  } else if (command == 255){ //this is the reverse fan command
+  } else if (command == 127){ //this is the reverse fan command
     valveOpen = 1;
     timeOpen = 100;
     digitalWrite(PIN_M0_OUT, HIGH);
@@ -180,8 +183,17 @@ void packet_processing(uint8_t Pkt_Buff[]){
 }
 
 void sendI2C(){
-  Wire.write(valveOpen);
-  Wire.write(timeOpen);
+  union {
+    uint32_t v;
+  uint8_t bytes[4];
+  } a;
+  a.v = timeOpen;
+  Wire.write(0);
+  //bytes[0] = timeOpen % (uint32_t)(pow(2, 8));
+  //bytes[1] = timeOpen % (uint32_t)(pow(2, 16)) / pow(2, 8);
+  //bytes[2] = timeOpen % (uint32_t)(pow(2, 24)) / pow(2, 16);
+  //bytes[3] = timeOpen / (uint32_t)(pow(2, 24));
+  for (int i=0; i<4; i++){ Wire.write(2); delay(5);}
 }
 
 void receiveI2C(){
@@ -199,7 +211,7 @@ void receiveI2C(){
     a.bytes[i] = Wire.read();
   for (int i=0; i<4; i++)
     v.bytes[i] = Wire.read();
-  if(command){
+  if(command == 1){
     digitalWrite(PIN_M0_OUT, LOW);
     valveOpen = 0;  //reset the trinket so that the arduino doesn't open continuously
     if(v.data != 0.0){ //nothing happened

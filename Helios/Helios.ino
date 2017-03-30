@@ -34,7 +34,7 @@ Adafruit_GPS GPS(&GPSSerial);
 #define MOTOR_SPEED 255 //PWM oscillation between 0 and 255
 #define VALVE_MOVE_TIME 9000 //milliseconds
 #define ALTITUDE_TO_OPEN 20000 //meters
-uint32_t TIME_OPEN = 100000; //milliseconds
+int32_t TIME_OPEN = 100000; //milliseconds
 #define NUM_OF_CHECKS 40 //the number of times the GPS must confirm altitude to open the valve (2 minutes)
 #define SD_CHIP_SELECT 4        // This is the Chip Select for the adafruit feather
 #define INSIDE_SENSOR 0 //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
@@ -42,22 +42,24 @@ uint32_t TIME_OPEN = 100000; //milliseconds
 #define FREQUENCY 500 //time in milliseconds between logging
 
 //Pin Numbers
-#define PIN_ACTUATOR_A 13 // Turning PIN_A high will make the actuator extend
-#define PIN_ACTUATOR_B 12
-#define PIN_ACTUATOR_PWM 11
-#define PIN_ACTUATOR_READ A6
-#define PIN_MOTOR_A 10 //Turning PIN_A high will make the motor blow forwards
-#define PIN_MOTOR_B 9
-#define PIN_MOTOR_PWM 6
+#define PIN_MOTOR_A 13 // Turning PIN_A high will make the actuator extend
+#define PIN_MOTOR_B 12
+#define PIN_MOTOR_PWM 11
+#define PIN_ACTUATOR_READ A2
+#define PIN_ACTUATOR_A 10 //Turning PIN_A high will make the motor blow forwards
+#define PIN_ACTUATOR_B 9
+#define PIN_ACTUATOR_PWM 6
 #define PIN_LED A0
 #define PIN_TRINKET_IN A1  //When this pin goes high, the arduino knows that there is data from the xbee waiting
 
 //LED Setup
-Adafruit_NeoPixel led = Adafruit_NeoPixel(1, PIN_LED, NEO_RGB + NEO_KHZ800);
+Adafruit_NeoPixel led = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
 const uint32_t off = led.Color(0,0,0);
 const uint32_t blue = led.Color(0,0,255);
 const uint32_t green = led.Color(0,255,0);
 const uint32_t red = led.Color(255,0,0);
+const uint32_t white = led.Color(255,255,255);
+const uint32_t yellow = led.Color(255, 255, 0);
 
 //Data structures
 struct MY_HONEYWELL{
@@ -102,7 +104,7 @@ unsigned long valve_time_at_open = 400000000; //must be large, does not have to 
 uint8_t valve_counter=0;
 boolean valve_open=0;
 boolean valve_already_closed=0;
-float actuator_pos=0; //mm
+float actuator_pos=25.0; //mm
 boolean valveState = 0; //true for open, false for closed
 
 //For communication
@@ -138,7 +140,7 @@ uint32_t timer = millis();
 //Normal startup sequence is blue --> green --> blinking green --> solid green --> off.
 void setup() {
   //Wait half a second
-  delay(500);
+  delay(5000);
   Serial.begin(115200);
   
   //Start acutator and motor pins
@@ -156,16 +158,17 @@ void setup() {
   led.show(); //blue led means the code has just started and the valve is opening
   
   //open valve & close valve
-  valveOpen();
-  delay(5000);
+  /*valveOpen();
+  while(actuator_pos > 1.0) //wait for the valve to close, then turn it off
+    actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveClose();
   while(actuator_pos < 49.0) //wait for the valve to close, then turn it off
     actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveOff();
-
+  */
   //Initialize I2C
   Wire.begin();
-  if (digitalRead(PIN_TRINKET_IN)){
+  if (digitalRead(PIN_TRINKET_IN) == HIGH){
     led.setPixelColor(0, red);
     led.show();
     delay(5000); //if the trinker thinks something is wrong, turn the led red
@@ -179,14 +182,17 @@ void setup() {
       led.show();
       delay(500); //led blinks blue to confirm it has communicated with the trinket; at this point, check that xbee has sent data
   }
-  
-  led.setPixelColor(0, green);
-  led.show(); //green indicates that the valve should be closed.
 
   //Turn fan on and off
   fanOn();
-  delay(2000);
+  digitalWrite(12, HIGH);
+  delay(20000000);
   fanOff();
+
+  led.setPixelColor(0, green);
+  led.show(); //green indicates that the fan should have worked.
+
+  //delay(10000000);
   
   //Begin logging data to SD Card
   Serial.print("\n\nInitializing SD card...");
@@ -200,6 +206,7 @@ void setup() {
   }
   Serial.println("card initialized.");
 
+  
   //Write "Starting" on the SD card
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
   if (dataFile) {// if the file is available, write to it:
@@ -216,7 +223,11 @@ void setup() {
     delay(5000);
   }
 
-  for (int i=0; i<3; i++){
+  delay(1000);
+  led.setPixelColor(0, blue);
+  led.show();
+
+  /*for (int i=0; i<3; i++){
     tcaselect(i+2);
     if (!bme[i].begin()) {  
       Serial.println("Could not find a valid BME280 sensor, check wiring!");
@@ -235,7 +246,7 @@ void setup() {
   //useInterrupt(true);
 
   //implement something to check that all the pressure sensors are recording the correct data
-  
+  */
   for (int i=0; i<10; i++){
     led.setPixelColor(0, off);
     led.show();
@@ -244,9 +255,13 @@ void setup() {
     led.show();
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
   }
+
+  led.setPixelColor(0, off);
+  led.show();
 }
 
 void loop() {
+  led.setPixelColor(0, yellow); led.show();
   // read data from the GPS in the 'main loop'
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
@@ -264,78 +279,87 @@ void loop() {
     if (gpsData.fix){
       led.setPixelColor(0, off); //led turns off once we have a gps fix
       led.show();
+    }    
+  }
+  actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
+  if (valveState && actuator_pos < 1.0) //if valve has finished opening, turn it off
+    valveOff();
+  if (!valveState && actuator_pos > 49.0) //if valve has finished closing, turn it off
+    valveOff();
+  if (digitalRead(PIN_TRINKET_IN) == HIGH && abs(millis() - valve_time_at_open) > XBEE_WAIT_TIME){
+    //union {
+    //  uint32_t v;
+      uint8_t bytes[4];
+    //} commandData;
+    Wire.requestFrom(TRINKET_ADDR, 4, 1);
+    uint8_t toOpen=0;// = Wire.read();
+    //delay(5);
+    for (int i=0; i<4; i++){
+      bytes[i] = Wire.read();
+      delay(5);
     }
+    uint32_t commandTime = bytes[3]*pow(2, 24) + bytes[2]*pow(2, 16) + bytes[1]*pow(2, 8) + bytes[0];
+    //Serial.println(toOpen);
+    Serial.println(commandTime);
+    if (toOpen){ //doing this check is sort of unneeded, but seems like a logical safety
+      valve_already_closed = 0;
+      valve_open = 0; //these two lines reset the valve tracker to think that it is okay to open again
+      valve_counter = NUM_OF_CHECKS; //makes the valve open immediately without checking the altitude
+      TIME_OPEN = commandTime; //assign a new amount of time to open
+      if (commandTime == 0){//if we have been commanded to not open the valve at all
+        valve_open = 1;
+        valve_time_at_open = 0; //this tricks the valve into thinking it has already been opened, so it forces itself closed
+        TIME_OPEN = 1; //in this case, I opted to send 1 instead of zero so the user can be sure it is not blank data
+        led.setPixelColor(0, white); led.show();
+      }
+      else if (commandTime == 100){
+        valveOpen();
+        fanBack();
+        TIME_OPEN = 120001;
+        valve_open = 1;
+        valve_time_at_open = millis();
+        led.setPixelColor(0, yellow); led.show();
+      }
+      sendCommand(1);
+    }
+    else
+      sendCommand(0);
+  }
+  led.setPixelColor(0, off); led.show(); delay(100);
+  if (millis() - timer > FREQUENCY) {
     getHoneywell(0);
     getHoneywell(1);
     getBME(2);
     getBME(3);
     getBME(4);
-    actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
-    if (valveState && actuator_pos < 1.0) //if valve has finished opening, turn it off
-      valveOff();
-    if (!valveState && actuator_pos > 49.0) //if valve has finished closing, turn it off
-      valveOff();
-    if (digitalRead(PIN_TRINKET_IN) && abs(millis() - valve_time_at_open) > XBEE_WAIT_TIME){
-      Wire.requestFrom(TRINKET_ADDR, 5);
-      boolean toOpen = Wire.read();
-      byte commandData[4] = {0};
-      for (int i=0; i<4; i++)
-        commandData[i] = Wire.read();
-      uint32_t commandTime = *(uint32_t*)&commandData;
-      if (toOpen){ //doing this check is sort of unneeded, but seems like a logical safety
-        valve_already_closed = 0;
-        valve_open = 0; //these two lines reset the valve tracker to think that it is okay to open again
-        valve_counter = NUM_OF_CHECKS; //makes the valve open immediately without checking the altitude
-        TIME_OPEN = commandTime; //assign a new amount of time to open
-        if (commandTime == 0){//if we have been commanded to not open the valve at all
-          valve_open = 1;
-          valve_time_at_open = 0; //this tricks the valve into thinking it has already been opened, so it forces itself closed
-          TIME_OPEN = 1; //in this case, I opted to send 1 instead of zero so the user can be sure it is not blank data
-        }
-        else if (commandTime == 100){
-          valveOpen();
-          fanBack();
-          TIME_OPEN = 120001;
-          valve_open = 1;
-          valve_time_at_open = millis();
-        }
-        sendCommand(1);
-      }
-      else
-        sendCommand(0);
+    timer = millis(); 
+    writeLog();
+    counter++;
+    if (counter == vCounts){ //send data less frequently to the trinket
+      ascentVelocity = 1.0*(gpsData.altitude - oldAltitude)/(millis() - oldTime);
+      oldTime = millis();
+      oldAltitude = gpsData.altitude;
+      counter = 0;
+      sendData();
     }
-    if (millis() - timer > FREQUENCY) {
-      timer = millis(); 
-      writeLog();
-      counter++;
-      if (counter == vCounts){ //send data less frequently to the trinket
-        ascentVelocity = 1.0*(gpsData.altitude - oldAltitude)/(millis() - oldTime);
-        oldTime = millis();
-        oldAltitude = gpsData.altitude;
-        counter = 0;
-        sendData();
+    //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for TIME_OPEN seconds
+    if(!valve_already_closed){//if the valve has not already been opened and closed
+      if(gpsData.altitude > ALTITUDE_TO_OPEN){
+        valve_counter++;//add to the altitude verifier
       }
-      //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for TIME_OPEN seconds
-      if(!valve_already_closed){//if the valve has not already been opened and closed
-        if(gpsData.altitude > ALTITUDE_TO_OPEN){
-          valve_counter++;//add to the altitude verifier
-        }
-        if(valve_counter >= NUM_OF_CHECKS && !valve_open){//if it is time to open the valve
-          valveOpen();//this causes a 3 second delay where no data is taken.
-          fanOn();
-          valve_time_at_open = millis();
-          valve_open=1;
-        }
-        else if(millis() > (valve_time_at_open + TIME_OPEN)){//if we've been open long enough
-          valve_already_closed=1;
-          fanOff();
-          valveClose();
-        }
+      if(valve_counter >= NUM_OF_CHECKS && !valve_open){//if it is time to open the valve
+        valveOpen();//this causes a 3 second delay where no data is taken.
+        fanOn();
+        valve_time_at_open = millis();
+        valve_open=1;
+      }
+      else if(millis() > (valve_time_at_open + TIME_OPEN)){//if we've been open long enough
+        valve_already_closed=1;
+        fanOff();
+        valveClose();
       }
     }
   }
-  
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -494,7 +518,7 @@ void valveClose(void){//closes the valve by extending the piston
 }
 
 void valveOff(void){//puts zero voltage on each side of valve
-  Serial.println("Turning Valve Off");
+  //Serial.println("Turning Valve Off");
   digitalWrite(PIN_ACTUATOR_A, LOW);
   digitalWrite(PIN_ACTUATOR_B, LOW);
   digitalWrite(PIN_ACTUATOR_PWM, LOW);
@@ -524,25 +548,35 @@ void fanOff(void){//turns fan off
 void sendCommand(boolean opened){
   if (!opened){ //if unsuccessful, write normal data
     union {
+      int32_t v;
+      byte bytes[4];
+    } a;
+    union {
       float f;
       byte bytes[4];
     } u;
     u.f = ascentVelocity; //used to convert float to bytes which can be sent
+    a.v = gpsData.altitude;
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(1);
-    Wire.write(gpsData.altitude);
+    for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
     for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
     Wire.endTransmission();
   }
   else{ //if successful, write the data received
     union {
+      int32_t v;
+      byte bytes[4];
+    } a;
+    union {
       float f;
       byte bytes[4];
     } u;
     u.f = 0.0;
+    a.v = TIME_OPEN;
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(1);
-    Wire.write(TIME_OPEN);
+    for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
     for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
     Wire.endTransmission();
   }
@@ -551,13 +585,18 @@ void sendCommand(boolean opened){
 
 void sendData(){
   union {
+      int32_t v;
+      byte bytes[4];
+    } a;
+  union {
     float f;
     byte bytes[4];
   } u;
   u.f = ascentVelocity;
+  a.v = gpsData.altitude;
   Wire.beginTransmission(TRINKET_ADDR);
   Wire.write(0);
-  Wire.write(gpsData.altitude);
+  for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
   for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
   Wire.endTransmission();
 }
