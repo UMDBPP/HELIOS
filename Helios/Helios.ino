@@ -1,3 +1,4 @@
+/*USE BOARD "ADAFRUIT FEATHER M0" and Programmer "AVRISP mkll"!*/
 #include <Wire.h> //Needed for I2C
 #include <SPI.h> //SD
 #include <SD.h> //SD-> ~5250 bytes Storage and ~800 bytes global variables
@@ -60,6 +61,10 @@ const uint32_t green = led.Color(0,255,0);
 const uint32_t red = led.Color(255,0,0);
 const uint32_t white = led.Color(255,255,255);
 const uint32_t yellow = led.Color(255, 255, 0);
+const uint32_t purple = led.Color(0, 255, 255);
+const uint32_t turquoise = led.Color(255, 0, 255);
+const uint32_t orange = led.Color(128, 255, 0);
+const uint32_t pink = led.Color(100, 255, 180);
 
 //Data structures
 struct MY_HONEYWELL{
@@ -154,18 +159,19 @@ void setup() {
 
   led.begin();
   led.show(); //initialize the status led
-  led.setPixelColor(0, blue);
-  led.show(); //blue led means the code has just started and the valve is opening
-  
+  led.setPixelColor(0, blue); led.show(); //blue led means the code has just started and the valve is opening
+
   //open valve & close valve
-  /*valveOpen();
+  valveOpen();
   while(actuator_pos > 1.0) //wait for the valve to close, then turn it off
     actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveClose();
   while(actuator_pos < 49.0) //wait for the valve to close, then turn it off
     actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveOff();
-  */
+
+  led.setPixelColor(0, purple); led.show(); //purple means the valve is done closing
+
   //Initialize I2C
   Wire.begin();
   if (digitalRead(PIN_TRINKET_IN) == HIGH){
@@ -173,26 +179,13 @@ void setup() {
     led.show();
     delay(5000); //if the trinker thinks something is wrong, turn the led red
   }
-  sendData(); //send the data stream {-1 -2} to confirm xbee functionality 
-  for (int i=0; i<10; i++){
-      led.setPixelColor(0, off);
-      led.show();
-      delay(500);
-      led.setPixelColor(0, blue);
-      led.show();
-      delay(500); //led blinks blue to confirm it has communicated with the trinket; at this point, check that xbee has sent data
-  }
 
   //Turn fan on and off
   fanOn();
-  digitalWrite(12, HIGH);
-  delay(20000000);
+  delay(2000);
   fanOff();
 
-  led.setPixelColor(0, green);
-  led.show(); //green indicates that the fan should have worked.
-
-  //delay(10000000);
+  led.setPixelColor(0, turquoise); led.show(); //turquoise means the fan should have turned on
   
   //Begin logging data to SD Card
   Serial.print("\n\nInitializing SD card...");
@@ -205,7 +198,6 @@ void setup() {
     return;
   }
   Serial.println("card initialized.");
-
   
   //Write "Starting" on the SD card
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
@@ -223,11 +215,9 @@ void setup() {
     delay(5000);
   }
 
-  delay(1000);
-  led.setPixelColor(0, blue);
-  led.show();
+  led.setPixelColor(0, pink); led.show(); //pink means the SD card is working
 
-  /*for (int i=0; i<3; i++){
+  for (int i=0; i<3; i++){
     tcaselect(i+2);
     if (!bme[i].begin()) {  
       Serial.println("Could not find a valid BME280 sensor, check wiring!");
@@ -246,7 +236,7 @@ void setup() {
   //useInterrupt(true);
 
   //implement something to check that all the pressure sensors are recording the correct data
-  */
+  
   for (int i=0; i<10; i++){
     led.setPixelColor(0, off);
     led.show();
@@ -255,13 +245,9 @@ void setup() {
     led.show();
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
   }
-
-  led.setPixelColor(0, off);
-  led.show();
 }
 
 void loop() {
-  led.setPixelColor(0, yellow); led.show();
   // read data from the GPS in the 'main loop'
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
@@ -287,19 +273,26 @@ void loop() {
   if (!valveState && actuator_pos > 49.0) //if valve has finished closing, turn it off
     valveOff();
   if (digitalRead(PIN_TRINKET_IN) == HIGH && abs(millis() - valve_time_at_open) > XBEE_WAIT_TIME){
-    //union {
-    //  uint32_t v;
+    union {
+      uint32_t v;
       uint8_t bytes[4];
-    //} commandData;
-    Wire.requestFrom(TRINKET_ADDR, 4, 1);
-    uint8_t toOpen=0;// = Wire.read();
-    //delay(5);
-    for (int i=0; i<4; i++){
-      bytes[i] = Wire.read();
-      delay(5);
-    }
-    uint32_t commandTime = bytes[3]*pow(2, 24) + bytes[2]*pow(2, 16) + bytes[1]*pow(2, 8) + bytes[0];
-    //Serial.println(toOpen);
+    } commandData;
+    Wire.requestFrom(TRINKET_ADDR, 1, 1);
+    uint8_t toOpen = Wire.read();
+    Wire.requestFrom(TRINKET_ADDR, 1, 1);
+    commandData.bytes[0] = Wire.read();
+    Wire.requestFrom(TRINKET_ADDR, 1, 1);
+    commandData.bytes[1] = Wire.read();
+    Wire.requestFrom(TRINKET_ADDR, 1, 1);
+    commandData.bytes[2] = Wire.read();
+    Wire.requestFrom(TRINKET_ADDR, 1, 1);
+    commandData.bytes[3] = Wire.read();
+    //for (int i=0; i<4; i++){
+    //  bytes[i] = Wire.read();
+    //  delay(5);
+    //}
+    uint32_t commandTime = commandData.v; //bytes[3]*pow(2, 24) + bytes[2]*pow(2, 16) + bytes[1]*pow(2, 8) + bytes[0];
+    Serial.println(toOpen);
     Serial.println(commandTime);
     if (toOpen){ //doing this check is sort of unneeded, but seems like a logical safety
       valve_already_closed = 0;
@@ -559,9 +552,17 @@ void sendCommand(boolean opened){
     a.v = gpsData.altitude;
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(1);
-    for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
-    for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
     Wire.endTransmission();
+    for (int i=0; i<4; i++){
+      Wire.beginTransmission(TRINKET_ADDR);
+      Wire.write(a.bytes[i]);
+      Wire.endTransmission();
+    }
+    for (int i=0; i<4; i++){
+      Wire.beginTransmission(TRINKET_ADDR);
+      Wire.write(u.bytes[i]);
+      Wire.endTransmission();
+    }
   }
   else{ //if successful, write the data received
     union {
@@ -576,9 +577,17 @@ void sendCommand(boolean opened){
     a.v = TIME_OPEN;
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(1);
-    for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
-    for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
     Wire.endTransmission();
+    for (int i=0; i<4; i++){
+      Wire.beginTransmission(TRINKET_ADDR);
+      Wire.write(a.bytes[i]);
+      Wire.endTransmission();
+    }
+    for (int i=0; i<4; i++){
+      Wire.beginTransmission(TRINKET_ADDR);
+      Wire.write(u.bytes[i]);
+      Wire.endTransmission();
+    }
   }
   delay(200); //we want the trinket to process the command before we move on
 }
@@ -596,8 +605,16 @@ void sendData(){
   a.v = gpsData.altitude;
   Wire.beginTransmission(TRINKET_ADDR);
   Wire.write(0);
-  for (int i=0; i<4; i++) Wire.write(a.bytes[i]);
-  for (int i=0; i<4; i++) Wire.write(u.bytes[i]);
   Wire.endTransmission();
+  for (int i=0; i<4; i++){
+    Wire.beginTransmission(TRINKET_ADDR);
+    Wire.write(a.bytes[i]);
+    Wire.endTransmission();
+  }
+  for (int i=0; i<4; i++){
+    Wire.beginTransmission(TRINKET_ADDR);
+    Wire.write(u.bytes[i]);
+    Wire.endTransmission();
+  }
 }
 

@@ -20,11 +20,15 @@
 #include "ccsds_xbee.h"
 CCSDS_Xbee xbee;
 uint16_t numTries = 0; //number of transmissions we have made since startup
+uint8_t sentCounter = 0;
 
 int32_t altitude; //last altitude in meters
 float ascentVelocity; //last speed
-uint32_t timeOpen=0;
-uint8_t valveOpen = 0;
+uint32_t timeOpen = 1;
+uint8_t valveOpen = 2;
+
+uint8_t receivedBytes[5];
+uint8_t receivedCounter = 0;
 
 //This program will only receive single byte command packets and send eight byte telemetry packets. All other xbee operatiosn are unused.
 
@@ -185,47 +189,73 @@ void packet_processing(uint8_t Pkt_Buff[]){
 void sendI2C(){
   union {
     uint32_t v;
-  uint8_t bytes[4];
+    uint8_t bytes[4];
   } a;
   a.v = timeOpen;
-  Wire.write(0);
+  if (sentCounter == 0){
+    Wire.write(valveOpen);
+    sentCounter++;
+  } else if (sentCounter == 1){
+    Wire.write(a.bytes[0]);
+    sentCounter++;
+  } else if (sentCounter == 2){
+    Wire.write(a.bytes[1]);
+    sentCounter++;
+  } else if (sentCounter == 3){
+    Wire.write(a.bytes[2]);
+    sentCounter++;
+  } else if (sentCounter == 4){
+    Wire.write(a.bytes[3]);
+    sentCounter = 0;
+  }
   //bytes[0] = timeOpen % (uint32_t)(pow(2, 8));
   //bytes[1] = timeOpen % (uint32_t)(pow(2, 16)) / pow(2, 8);
   //bytes[2] = timeOpen % (uint32_t)(pow(2, 24)) / pow(2, 16);
   //bytes[3] = timeOpen / (uint32_t)(pow(2, 24));
-  for (int i=0; i<4; i++){ Wire.write(2); delay(5);}
+  //for (int i=0; i<4; i++){ Wire.write(2); delay(5);}
 }
 
 void receiveI2C(){
-  boolean command = 0;
-  union {
-    int32_t data;
-    byte bytes[4];
-  } a;
-  union {
-    float data;
-    byte bytes[4];
-  } v;
-  command = Wire.read();
-  for (int i=0; i<4; i++)
-    a.bytes[i] = Wire.read();
-  for (int i=0; i<4; i++)
-    v.bytes[i] = Wire.read();
-  if(command == 1){
-    digitalWrite(PIN_M0_OUT, LOW);
-    valveOpen = 0;  //reset the trinket so that the arduino doesn't open continuously
-    if(v.data != 0.0){ //nothing happened
-      sendError(100);
-    }
-    else if (a.data == 120001){ //the fan is spinning backwards
-      sendConf(-1);
-    }
-    else{
-      sendConf(a.data); //everything is good
-    }
-    return;
-  }
+  receivedBytes[receivedCounter] = Wire.read();
+  receivedCounter++;
+  if (receivedCounter == 9){
+    receivedCounter = 0;
+    uint8_t command = receivedBytes[0];
+    union {
+      int32_t data;
+      byte bytes[4];
+    } a;
+    union {
+      float data;
+      byte bytes[4];
+    } v;
+    for (int i=0; i<4; i++) a.bytes[i] = receivedBytes[i+1];
+    for (int i=0; i<4; i++) v.bytes[i] = receivedBytes[i+5];
+  
   altitude = a.data;
   ascentVelocity = v.data;
+  valveOpen = altitude;
+  timeOpen = ascentVelocity;
+  digitalWrite(PIN_M0_OUT, HIGH);
+  delay(3000);
+  
+    if(command == 1){
+      digitalWrite(PIN_M0_OUT, LOW);
+      valveOpen = 0;  //reset the trinket so that the arduino doesn't open continuously
+      if(v.data != 0.0){ //nothing happened
+        sendError(100);
+      }
+      else if (a.data == 120001){ //the fan is spinning backwards
+        sendConf(-1);
+      }
+      else{
+        sendConf(a.data); //everything is good
+      }
+  
+      return;
+    }
+    altitude = a.data;
+    ascentVelocity = v.data;
+  }
 }
 
