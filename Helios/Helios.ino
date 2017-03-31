@@ -99,7 +99,7 @@ struct MY_GPS{
   char longitude_dir;//W/E
   float velocity;//knots
   float angle;//direction gps thinks we're moving
-  int32_t altitude=-1;//meters
+  int32_t altitude=11;//meters
   uint8_t satellites;//number of satellites
 };
 
@@ -113,7 +113,7 @@ float actuator_pos=25.0; //mm
 boolean valveState = 0; //true for open, false for closed
 
 //For communication
-float ascentVelocity = -2.0;
+float ascentVelocity = 25.0;
 int32_t oldAltitude = 0;
 unsigned long oldTime = 0;
 uint8_t counter = 0;
@@ -130,19 +130,11 @@ MY_BME bmeData[3];
 MY_GPS gpsData = {};
 boolean usingInterrupt = false;
 uint32_t timer = millis();
-
-/////////////////////////////////////////////////////
-/*
- * To Do:
- * xxxProgram LED
- * Program Xbee
- * Program BME280
- * xxxEnsure valve works as desired
- * xxxLogging every half second - make this a variable
- */
-
-//one of the most important things to test will be how the valve works without limit switches
-//Normal startup sequence is blue --> green --> blinking green --> solid green --> off.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
   //Wait half a second
   delay(5000);
@@ -170,7 +162,7 @@ void setup() {
     actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveOff();
 
-  led.setPixelColor(0, purple); led.show(); //purple means the valve is done closing
+  led.setPixelColor(0, purple); led.show(); delay(3000); //purple means the valve is done closing
 
   //Initialize I2C
   Wire.begin();
@@ -185,7 +177,7 @@ void setup() {
   delay(2000);
   fanOff();
 
-  led.setPixelColor(0, turquoise); led.show(); //turquoise means the fan should have turned on
+  led.setPixelColor(0, turquoise); led.show(); delay(3000);//turquoise means the fan should have turned on
   
   //Begin logging data to SD Card
   Serial.print("\n\nInitializing SD card...");
@@ -215,7 +207,7 @@ void setup() {
     delay(5000);
   }
 
-  led.setPixelColor(0, pink); led.show(); //pink means the SD card is working
+  led.setPixelColor(0, pink); led.show(); delay(3000);//pink means the SD card is working
 
   for (int i=0; i<3; i++){
     tcaselect(i+2);
@@ -226,7 +218,7 @@ void setup() {
       delay(5000);
     }
   }
-
+/*
   //GPS startup
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //turn on RMC (recommended minimum) and GGA (fix data) including altitude
@@ -234,7 +226,7 @@ void setup() {
   //GPS.sendCommand(PGCMD_ANTENNA); // Request updates on antenna status, comment out to keep quiet
   //GPSSerial.println(PMTK_Q_RELEASE);  // Ask for firmware version
   //useInterrupt(true);
-
+*/
   //implement something to check that all the pressure sensors are recording the correct data
   
   for (int i=0; i<10; i++){
@@ -247,7 +239,13 @@ void setup() {
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void loop() {
+  delay(1000);
   // read data from the GPS in the 'main loop'
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
@@ -287,11 +285,7 @@ void loop() {
     commandData.bytes[2] = Wire.read();
     Wire.requestFrom(TRINKET_ADDR, 1, 1);
     commandData.bytes[3] = Wire.read();
-    //for (int i=0; i<4; i++){
-    //  bytes[i] = Wire.read();
-    //  delay(5);
-    //}
-    uint32_t commandTime = commandData.v; //bytes[3]*pow(2, 24) + bytes[2]*pow(2, 16) + bytes[1]*pow(2, 8) + bytes[0];
+    uint32_t commandTime = commandData.v;
     Serial.println(toOpen);
     Serial.println(commandTime);
     if (toOpen){ //doing this check is sort of unneeded, but seems like a logical safety
@@ -313,10 +307,10 @@ void loop() {
         valve_time_at_open = millis();
         led.setPixelColor(0, yellow); led.show();
       }
-      sendCommand(1);
+      sendCommand(1); //this tells the trinket to turn off and to send the ground a confirmation
     }
     else
-      sendCommand(0);
+      sendCommand(0); //this option is available so that the trinket can force the M0 to update data, but this capability is currently not implemented in the trinket
   }
   led.setPixelColor(0, off); led.show(); delay(100);
   if (millis() - timer > FREQUENCY) {
@@ -355,7 +349,10 @@ void loop() {
   }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void recordGPS(){
   gpsData.hour = GPS.hour;//this whole sequence could be more efficient if we were memory limited, but as is, this helps keep data organized and isolated
@@ -470,6 +467,11 @@ void writeLog(void){
   dataString += (String)bmeData[2].temperature + ",";
   dataString += (String)bmeData[2].humidity + ",";
   dataString += (String)bmeData[2].altitude + ",";
+
+
+  dataString += (String)ascentVelocity + ",";
+  dataString += (String)actuator_pos + ",";
+  dataString += (String)valveState + ",";
   
   dataString += (String)valve_open + ",";
   dataString += (String)actuator_pos + ",";
@@ -538,6 +540,7 @@ void fanOff(void){//turns fan off
   analogWrite(PIN_MOTOR_PWM, 0);
 }
 
+
 void sendCommand(boolean opened){
   if (!opened){ //if unsuccessful, write normal data
     union {
@@ -551,17 +554,17 @@ void sendCommand(boolean opened){
     u.f = ascentVelocity; //used to convert float to bytes which can be sent
     a.v = gpsData.altitude;
     Wire.beginTransmission(TRINKET_ADDR);
-    Wire.write(1);
-    Wire.endTransmission();
+    Wire.write((uint8_t)1);
+    Wire.endTransmission(); delay(5);
     for (int i=0; i<4; i++){
       Wire.beginTransmission(TRINKET_ADDR);
       Wire.write(a.bytes[i]);
-      Wire.endTransmission();
+      Wire.endTransmission(); delay(5);
     }
     for (int i=0; i<4; i++){
       Wire.beginTransmission(TRINKET_ADDR);
       Wire.write(u.bytes[i]);
-      Wire.endTransmission();
+      Wire.endTransmission(); delay(5);
     }
   }
   else{ //if successful, write the data received
@@ -576,17 +579,17 @@ void sendCommand(boolean opened){
     u.f = 0.0;
     a.v = TIME_OPEN;
     Wire.beginTransmission(TRINKET_ADDR);
-    Wire.write(1);
-    Wire.endTransmission();
+    Wire.write((uint8_t)1);
+    Wire.endTransmission(); delay(5); //these delay statements are necessary, not merely advised. The Trinket will drop bytes without them.
     for (int i=0; i<4; i++){
       Wire.beginTransmission(TRINKET_ADDR);
       Wire.write(a.bytes[i]);
-      Wire.endTransmission();
+      Wire.endTransmission(); delay(5);
     }
     for (int i=0; i<4; i++){
       Wire.beginTransmission(TRINKET_ADDR);
       Wire.write(u.bytes[i]);
-      Wire.endTransmission();
+      Wire.endTransmission(); delay(5);
     }
   }
   delay(200); //we want the trinket to process the command before we move on
@@ -604,17 +607,17 @@ void sendData(){
   u.f = ascentVelocity;
   a.v = gpsData.altitude;
   Wire.beginTransmission(TRINKET_ADDR);
-  Wire.write(0);
-  Wire.endTransmission();
+  Wire.write((uint8_t)0);
+  Wire.endTransmission(); delay(5);
   for (int i=0; i<4; i++){
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(a.bytes[i]);
-    Wire.endTransmission();
+    Wire.endTransmission(); delay(5);
   }
   for (int i=0; i<4; i++){
     Wire.beginTransmission(TRINKET_ADDR);
     Wire.write(u.bytes[i]);
-    Wire.endTransmission();
+    Wire.endTransmission(); delay(5);
   }
+  delay(200);
 }
-

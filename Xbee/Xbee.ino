@@ -1,3 +1,4 @@
+/*Board "Pro Trinket 3V/12MHz (USB)" Programmer "USBTiny"*/
 #include<Wire.h>
 
 //I2C configuration
@@ -24,13 +25,13 @@ uint8_t sentCounter = 0;
 
 int32_t altitude; //last altitude in meters
 float ascentVelocity; //last speed
-uint32_t timeOpen = 1;
-uint8_t valveOpen = 2;
+uint32_t timeOpen = 100000; //this theoretically can be initialized to anything, but I have chosen to initialize it to the same value as the M0 will initialize
+uint8_t valveOpen = 0; //initialized to not doing anything
 
 uint8_t receivedBytes[5];
 uint8_t receivedCounter = 0;
 
-//This program will only receive single byte command packets and send eight byte telemetry packets. All other xbee operatiosn are unused.
+//This program will only receive single byte command packets and send eight byte telemetry packets. All other xbee operations are unused.
 
 void setup(){
   Wire.begin(TRINKET_ADDR);
@@ -49,11 +50,10 @@ void setup(){
     Serial.println(initstat);
     digitalWrite(PIN_M0_OUT, HIGH); //tell the m0 that we have a problem so that it can alert the user via the status led
   }
-  
-  digitalWrite(PIN_M0_OUT, HIGH);
 }
 
 void loop(){
+  delay(100);
   receiveXbee();
   /*
    * All this processor even does is look for and send xbee messages
@@ -232,13 +232,6 @@ void receiveI2C(){
     for (int i=0; i<4; i++) a.bytes[i] = receivedBytes[i+1];
     for (int i=0; i<4; i++) v.bytes[i] = receivedBytes[i+5];
   
-  altitude = a.data;
-  ascentVelocity = v.data;
-  valveOpen = altitude;
-  timeOpen = ascentVelocity;
-  digitalWrite(PIN_M0_OUT, HIGH);
-  delay(3000);
-  
     if(command == 1){
       digitalWrite(PIN_M0_OUT, LOW);
       valveOpen = 0;  //reset the trinket so that the arduino doesn't open continuously
@@ -250,12 +243,12 @@ void receiveI2C(){
       }
       else{
         sendConf(a.data); //everything is good
-      }
-  
-      return;
+      }//no need to update the altitude and ascent velocity if we receive a command code.
     }
-    altitude = a.data;
-    ascentVelocity = v.data;
+    else{
+      altitude = a.data;
+      ascentVelocity = v.data;
+    }
   }
 }
 
