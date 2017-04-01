@@ -1,0 +1,3 @@
+COMMANDS EXPLANATIONS
+1. OPEN___ commands the valve to open immediately for the specified number of seconds. If successfully received, Helios will send back a confirmation packet with the time open in milliseconds.
+2. OPENALL commands the valve to open indefinitely. It will return a confirmation packet with a very large number.
