@@ -180,7 +180,7 @@ void packet_processing(uint8_t Pkt_Buff[]){
   }
   else if (command > 1){ //this is the open now command
     valveOpen = 1;
-    timeOpen = (command-1)*30000; //in this case, the time open is the command value times 30 in seconds
+    timeOpen = (command-1)*10000; //in this case, the time open is the command value times 30 in seconds
     digitalWrite(PIN_M0_OUT, HIGH); 
   }
   delay(WAIT_TIME_SUCCESS);
