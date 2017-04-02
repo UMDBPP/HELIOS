@@ -1,3 +1,12 @@
 COMMANDS EXPLANATIONS
 1. OPEN___ commands the valve to open immediately for the specified number of seconds. If successfully received, Helios will send back a confirmation packet with the time open in milliseconds.
 2. OPENALL commands the valve to open indefinitely. It will return a confirmation packet with a very large number.
+3. ABORT commands Helios to either close the valve or prevent it from opening. Helios will return a confirmation packet with time field zero.
+4. OPENBACK commands Helios to open the fan and turn the fan on in reverse for two minutes, causing the balloon to inflate further and potentially pop. If successful, Helios returns a confirmation packet with time field negative one.
+5. REQ_DATA commands Helios to send the most recent telemetry packet. Helios will return a telemetry packet with the current altitude and ascent rate.
+
+COMMAND ACTIONS
+1. In an ideal case, no commands from Link are required.
+2. If possible, it would be good to check the altitude and ascent rate between 50000 ft and 70000 ft, and communicate this over Zello. If there is no noticable change in ascent rate after opening, then you can command Helios to open for additional time. Start with one minute intervals.
+3. If needed, you can disable Helios by sending the abort command. Please check with the Flight Director and Helios Director before sending this command. Helios can be reenabled afterwards by sending any of the open commands.
+4. The open permanently command and open reverse commands should not be needed. Consult with the flight director before sending these commands. 
