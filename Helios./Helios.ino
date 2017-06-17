@@ -2,9 +2,14 @@
 #include <Wire.h> //Needed for I2C
 #include <SPI.h> //SD
 #include <SD.h> //SD-> ~5250 bytes Storage and ~800 bytes global variables
+#include <Adafruit_GPS.h>
+#include<Adafruit_Sensor.h>
 #include <Adafruit_NeoPixel.h>
 
 //GPS hardware serial startup
+#define GPSSerial Serial1
+Adafruit_GPS GPS(&GPSSerial);
+#define GPSECHO false
 
 //Honeywell sensor values
 #define SSC_ADDR 0x28      // Address of the sensor, not needed while using the multiplexer
@@ -28,8 +33,8 @@
 //Control Parameters
 #define MOTOR_SPEED 255 //PWM oscillation between 0 and 255
 #define VALVE_MOVE_TIME 9000 //milliseconds
-#define ALTITUDE_TO_OPEN 20000 //meters
-int32_t TIME_OPEN = 100000; //milliseconds
+#define ALTITUDE_TO_OPEN 18000 //meters
+int32_t TIME_OPEN = 20000; //milliseconds
 #define NUM_OF_CHECKS 40 //the number of times the GPS must confirm altitude to open the valve (2 minutes)
 #define SD_CHIP_SELECT 4        // This is the Chip Select for the adafruit feather
 #define INSIDE_SENSOR 0 //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
@@ -37,8 +42,8 @@ int32_t TIME_OPEN = 100000; //milliseconds
 #define FREQUENCY 500 //time in milliseconds between logging
 
 //Pin Numbers
-#define PIN_MOTOR_A 13 // Turning PIN_A high will make the actuator extend
-#define PIN_MOTOR_B 12
+#define PIN_MOTOR_A 12 // Turning PIN_A high will make the actuator extend
+#define PIN_MOTOR_B 13
 #define PIN_MOTOR_PWM 11
 #define PIN_ACTUATOR_READ A2
 #define PIN_ACTUATOR_A 10 //Turning PIN_A high will make the motor blow forwards
@@ -109,6 +114,8 @@ boolean command = 0;
 //For Honeywell
 MY_HONEYWELL honeywells[2];
 
+//For BME280s
+
 //For GPS
 MY_GPS gpsData = {};
 boolean usingInterrupt = false;
@@ -137,8 +144,9 @@ void setup() {
   led.setPixelColor(0, blue); led.show(); //blue led means the code has just started and the valve is opening
 
   //open valve & close valve
+
   valveOpen();
-  while(actuator_pos > 40.0) //wait for the valve to close, then turn it off
+  while(actuator_pos > 1.0) //wait for the valve to close, then turn it off
     actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   valveClose();
   while(actuator_pos < 49.0) //wait for the valve to close, then turn it off
@@ -164,7 +172,8 @@ void setup() {
   
   //Begin logging data to SD Card
   Serial.print("\n\nInitializing SD card...");
-  if (!SD.begin(SD_CHIP_SELECT)) { // see if the card is present and can be initialized:
+  
+  if (!SD.begin(4)) { // see if the card is present and can be initialized:
     Serial.println("Card failed, or not present");
     // don't do anything more:
     led.setPixelColor(0, red);
@@ -175,7 +184,7 @@ void setup() {
   Serial.println("card initialized.");
   
   //Write "Starting" on the SD card
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
   if (dataFile) {// if the file is available, write to it:
     dataFile.println("Starting:");
     dataFile.println(HEADER_STRING);
@@ -190,18 +199,27 @@ void setup() {
     delay(5000);
   }
 
-  led.setPixelColor(0, pink); led.show(); delay(3000);//pink means the SD card is working
+  led.setPixelColor(0, yellow); led.show(); delay(3000);//pink means the SD card is working
 
-  
-/*
-  //GPS startup
+  /*for (int i=0; i<3; i++){
+    tcaselect(i+2);
+    if (!bme[i].begin()) {  
+      Serial.println("Could not find a valid BME280 sensor, check wiring!");
+      led.setPixelColor(0, red);
+      led.show(); //red indicates an error
+      delay(5000);
+    }
+  }*/
+
+  /*//GPS startup
   GPS.begin(9600);
+  GPS.sendCommand("$PGCMD,33,0*6D");
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //turn on RMC (recommended minimum) and GGA (fix data) including altitude
-  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_5HZ); // 1 Hz update rate
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
   //GPS.sendCommand(PGCMD_ANTENNA); // Request updates on antenna status, comment out to keep quiet
   //GPSSerial.println(PMTK_Q_RELEASE);  // Ask for firmware version
   //useInterrupt(true);
-*/
+  */
   //implement something to check that all the pressure sensors are recording the correct data
   
   for (int i=0; i<10; i++){
@@ -212,6 +230,11 @@ void setup() {
     led.show();
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
   }
+/*
+  while(!GPS.newNMEAreceived()){
+    char c = GPS.read();
+  }
+  led.setPixelColor(0, turquoise);*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,11 +243,25 @@ void setup() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
-  delay(100);
   // read data from the GPS in the 'main loop'
+  /*char c = GPS.read();
+  // if you want to debug, this is a good time to do it!
+  if (GPSECHO)
+    if (c) Serial.print(c);
+  // if a sentence is received, we can check the checksum, parse it...
+  if (GPS.newNMEAreceived()) {
+    // a tricky thing here is if we print the NMEA sentence, or data
+    // we end up not listening and catching other sentences!
+    // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
+    // Serial.println(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
+    if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
+      ; // we can fail to parse a sentence in which case we should just wait for another
     recordGPS();
+    if (gpsData.fix){
       led.setPixelColor(0, off); //led turns off once we have a gps fix
       led.show();
+    }    
+  }*/
   actuator_pos = 50.0*analogRead(PIN_ACTUATOR_READ)/1032.0;
   if (valveState && actuator_pos < 1.0) //if valve has finished opening, turn it off
     valveOff();
@@ -272,10 +309,12 @@ void loop() {
     else
       sendCommand(0); //this option is available so that the trinket can force the M0 to update data, but this capability is currently not implemented in the trinket
   }
-  led.setPixelColor(0, off); led.show(); delay(100);
-  if (millis() - timer > FREQUENCY) {
+  if ((millis() - timer) > FREQUENCY) {
     getHoneywell(0);
     getHoneywell(1);
+    /*getBME(2);
+    getBME(3);
+    getBME(4);*/
     timer = millis(); 
     writeLog();
     counter++;
@@ -312,7 +351,26 @@ void loop() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void recordGPS(){
-  ;
+  gpsData.hour = GPS.hour;//this whole sequence could be more efficient if we were memory limited, but as is, this helps keep data organized and isolated
+  gpsData.minute = GPS.minute;
+  gpsData.second = GPS.seconds;
+  gpsData.millisecond = GPS.milliseconds;
+  gpsData.day = GPS.day;
+  gpsData.month = GPS.month;
+  gpsData.year = 2000+GPS.year;
+  gpsData.fix = GPS.fix;
+  if(GPS.fix){
+    gpsData.latitude_deg = GPS.latitude/100;
+    gpsData.latitude_min = GPS.latitude- 100*gpsData.latitude_deg;
+    gpsData.latitude_dir = GPS.lat;
+    gpsData.longitude_deg = GPS.longitude/100;
+    gpsData.longitude_min = GPS.longitude - 100*gpsData.longitude_deg;
+    gpsData.longitude_dir = GPS.lon;
+    gpsData.velocity = GPS.speed;
+    gpsData.angle = GPS.angle;
+    gpsData.altitude = GPS.altitude;
+    gpsData.satellites = GPS.satellites;
+  }
 }
 
 void getHoneywell(uint8_t sensor){
@@ -338,8 +396,6 @@ void getHoneywell(uint8_t sensor){
   }
 }
 
-
-
 void tcaselect(uint8_t i) {//selects which pressure sensor we're talking to with the I2C multiplexer
   if (i > 7) return; //if invalid
   Wire.beginTransmission(MULTI_ADDR);  //call the multiplexer
@@ -356,6 +412,7 @@ void writeLog(void){
   dataString += (String)gpsData.month + ","; 
   dataString += (String)gpsData.day + ",";
   dataString += (String)gpsData.hour + ",";
+  dataString += (String)GPS.minute + ",";
   dataString += (String)gpsData.second + ",";
   dataString += (String)gpsData.millisecond + ",";
   dataString += (String)gpsData.fix + ",";
@@ -384,6 +441,21 @@ void writeLog(void){
   dataString += (String)honeywells[1].rawPressure + ",";
   dataString += (String)honeywells[1].rawTemperature + ",";
 
+  /*dataString += (String)bmeData[0].pressure + ",";
+  dataString += (String)bmeData[0].temperature + ",";
+  dataString += (String)bmeData[0].humidity + ",";
+  dataString += (String)bmeData[0].altitude + ",";
+
+  dataString += (String)bmeData[1].pressure + ",";
+  dataString += (String)bmeData[1].temperature + ",";
+  dataString += (String)bmeData[1].humidity + ",";
+  dataString += (String)bmeData[1].altitude + ",";
+
+  dataString += (String)bmeData[2].pressure + ",";
+  dataString += (String)bmeData[2].temperature + ",";
+  dataString += (String)bmeData[2].humidity + ",";
+  dataString += (String)bmeData[2].altitude + ",";*/
+
 
   dataString += (String)ascentVelocity + ",";
   dataString += (String)actuator_pos + ",";
@@ -398,7 +470,7 @@ void writeLog(void){
 
 void writeSD(String dataString){
   // open the file. note that only one file can be open at a time
-  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  File dataFile = SD.open("DATALOG.txt", FILE_WRITE);
   
   // if the file is available, write to it:
   if (dataFile) {
