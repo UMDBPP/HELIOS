@@ -1,29 +1,30 @@
-/*USE BOARD "ADAFRUIT FEATHER M0" and Programmer "AVRISP mkll"!*/
-#include <Wire.h> //Needed for I2C
-#include <SPI.h> //SD
-#include <SD.h> //SD-> ~5250 bytes Storage and ~800 bytes global variables
+/*Now using in house custom Balloonduino board*/
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
 #include <Adafruit_GPS.h>
 #include<Adafruit_Sensor.h>
 #include <Adafruit_NeoPixel.h>
 
 //GPS hardware serial startup
-#define GPSSerial Serial1
+#define GPSSerial Serial1 //Pins 18 and 19 on Arduino mega
 Adafruit_GPS GPS(&GPSSerial);
 #define GPSECHO false
 
 //Honeywell sensor values
-#define SSC_ADDR 0x28      // Address of the sensor, not needed while using the multiplexer
+#define SSC_ADDR 0x28      // Address of the sensor
 #define MULTI_ADDR 0x70            // Address of the multiplexer
-#define SSC_MIN 0            // Minimum pressure the sensor detects
+#define SSC_MIN 0            // Minimum value the sensor returns
 #define SSC_MAX 0x3fff       // 2^14 - 1
 #define PRESSURE_MIN 0.0        // Min is 0 for sensors that give absolute values
 #define PRESSURE_MAX 206842.7   // Max presure of the 30psi for this sensor converted to Pascals
+#define INSIDE_SENSOR 0 //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
+#define OUTSIDE_SENSOR 1  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
 
 //BME280 Values
 #define SEALEVELPRESSURE_HPA (1013.25)
 
-//Trinket Values
-#define TRINKET_ADDR 9
+//Xbee Values
 #define vCounts 10  //the number of counts we wait to get a more accurate average altitude
 #define XBEE_WAIT_TIME 5000   //the wait time to receive commands; I built this in so that we cannot receive duplicate commands
 
@@ -35,10 +36,8 @@ Adafruit_GPS GPS(&GPSSerial);
 #define VALVE_MOVE_TIME 9000 //milliseconds
 #define ALTITUDE_TO_OPEN 18000 //meters
 int32_t TIME_OPEN = 20000; //milliseconds
-#define NUM_OF_CHECKS 40 //the number of times the GPS must confirm altitude to open the valve (2 minutes)
-#define SD_CHIP_SELECT 4        // This is the Chip Select for the adafruit feather
-#define INSIDE_SENSOR 0 //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
-#define OUTSIDE_SENSOR 1  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
+#define NUM_OF_CHECKS 40 //the number of times the GPS must confirm altitude to open the valve
+#define SD_CHIP_SELECT 4        // This is the Chip Select for the SD writer
 #define FREQUENCY 500 //time in milliseconds between logging
 
 //Pin Numbers
@@ -50,7 +49,6 @@ int32_t TIME_OPEN = 20000; //milliseconds
 #define PIN_ACTUATOR_B 9
 #define PIN_ACTUATOR_PWM 6
 #define PIN_LED A0
-#define PIN_TRINKET_IN A1  //When this pin goes high, the arduino knows that there is data from the xbee waiting
 
 //LED Setup
 Adafruit_NeoPixel led = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
@@ -97,7 +95,7 @@ struct MY_GPS{
 
 //Global Variables
 //For Valve
-unsigned long valve_time_at_open = 400000000; //must be large, does not have to be that <<<
+unsigned long valve_time_at_open=400000000; //must be large, does not have to be that <<<
 uint8_t valve_counter=0;
 boolean valve_open=0;
 boolean valve_already_closed=0;
