@@ -1,9 +1,17 @@
 #include "ccsds_xbee.h"
 #include <Arduino.h>
 
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
+
 #define _NO_RTC_
 #define PKT_MAX_LEN 100
-#define XbeeSerial Serial2 //Pins 16 and 17
+#define XbeeSerial Serial3 //Pins 14 and 15, the location of the xbee on balloonduino board
 
 class XBEE{
 
@@ -16,12 +24,12 @@ class XBEE{
     const int AP_ID_TLM = 810;   //the AP_ID that will be used to send all telemetry packets
     const int AP_ID_ERR = 890;   //the AP_ID that will be used to send all error packets
     const int AP_ID_CON = 850;   //the AP_ID used to send a confirmation
-    const int TIME_TO_OPEN_REVERSE = 120000; //this is the time for which the valve will blow air into the balloon if commanded in reverse
+    const uint32_t TIME_TO_OPEN_REVERSE = 120000; //this is the time for which the valve will blow air into the balloon if commanded in reverse
 
     CCSDS_Xbee xbee;
-    uint16_t numTries = 0; //number of transmissions we have made since startup
+    uint16_t numTries = 1; //number of transmissions we have made since startup
     uint8_t lastCommand;
-    uint32_t lastCommandedTime;
+    int32_t lastCommandedTime;
 
     boolean packet_processing(uint8_t Pkt_Buff[]){
       if(getAPID(Pkt_Buff) != AP_ID_CMD){ //check that we have the correct AP_ID
@@ -34,9 +42,11 @@ class XBEE{
       }
       if(!packetHasValidChecksum(ERROR_CODE_BAD_CHECKSUM)){  //check that we have received a valid checksum
         sendError(5);
-        return 0;
+        //return 0;
       }
-    
+
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println((String)millis() + "Valid packet has been received");
+      
       //if everything is good, then we will actually process the command
       uint8_t command = getCmdFunctionCode(Pkt_Buff);
       if (command == 0){ //this is the receive telemetry command
@@ -45,14 +55,14 @@ class XBEE{
       } else if (command == 1){ //this is the abort command
         lastCommand = COMMAND_ABORT;
         return 1;
-      } else if (command == 255){ //this is the reverse fan command
+      } else if (command == 127){ //this is the reverse fan command
         lastCommand = COMMAND_REVERSE;
         lastCommandedTime = TIME_TO_OPEN_REVERSE;
         return 1;
       }
       else if (command > 1){ //this is the open now command
         lastCommand = COMMAND_OPEN_NOW;
-        lastCommandedTime = (command-1)*10000; //in this case, the time open is the command value times 10 in seconds
+        lastCommandedTime = ((int32_t)command-1)*10000; //in this case, the time open is the command value times 10 in seconds
         return 1;
       }
     }

@@ -24,7 +24,7 @@ COMMAND HELIOS OPEN60 BIG_ENDIAN "Helios Open 60 Seconds"
   
 COMMAND HELIOS OPEN90 BIG_ENDIAN "Helios Open 90 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 9} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 10} %>
   
 COMMAND HELIOS OPEN120 BIG_ENDIAN "Helios Open 2 Minutes"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
@@ -36,8 +36,8 @@ COMMAND HELIOS OPEN180 BIG_ENDIAN "Helios Open 3 Minutes"
   
 COMMAND HELIOS OPENALL BIG_ENDIAN "Helios Open Permanently"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 250} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 126} %>
   
 COMMAND HELIOS OPENBACK BIG_ENDIAN "Helios Reverse Fan"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 255} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 127} %>
