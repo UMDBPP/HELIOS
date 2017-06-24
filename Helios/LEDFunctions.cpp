@@ -3,8 +3,8 @@
 
 class LED{
   private:
-    Adafruit_NeoPixel led;
-    const int PIN_LED = A0;
+    Adafruit_NeoPixel myled;
+    const int PIN_LED = A5;
 
   public:
 
@@ -28,15 +28,15 @@ class LED{
 
   
     int initialize(){
-      led = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
-      led.begin();
-      led.show(); //initialize the status led
+      myled = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
+      myled.begin();
+      myled.show(); //initialize the status led
       setStatus(OFF);
     }
 
     void setStatus(uint32_t color){
-      led.setPixelColor(0, color);
-      led.show();
+      myled.setPixelColor(0, color);
+      myled.show();
     }
 };
 /*     

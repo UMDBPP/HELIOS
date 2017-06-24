@@ -2,8 +2,10 @@
 #include <Adafruit_GPS.h> //include gps library
 #include <Arduino.h>  //include arduino library to recognize keywords
 
+#if USING_GPS
 HardwareSerial GPS_Serial =  Serial1; //Pins 18 and 19 on Arduino mega
-Adafruit_GPS GPS(&Serial1); //initialize the gps
+Adafruit_GPS GPS(&Serial); //initialize the gps
+#endif
 
 //Data structure for storing gps info
 struct MY_GPS{
@@ -30,6 +32,7 @@ struct MY_GPS{
 
 //boolean usingInterrupt = false;
 
+#if USING_GPS
 class AGPS{
 
   private:
@@ -90,5 +93,5 @@ class AGPS{
       }
     }
 };
-
+#endif
 

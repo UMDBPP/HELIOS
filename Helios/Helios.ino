@@ -1,5 +1,8 @@
 /*Now using in house custom Balloonduino board*/
 
+#define USING_GPS false
+
+
 //Import Custom Libraries
 #include "GPSFunctions.cpp"
 #include "HoneywellFunctions.cpp"
@@ -50,11 +53,13 @@ uint32_t command_timer;
 //Create objects
 LED led;
 XBEE xbee;
-AGPS gps;
 Actuator actuator;
 Datalog datalog;
 Honeywell honeywell;
 Motor motor;
+#if (USING_GPS)
+  AGPS gps;
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
@@ -101,13 +106,17 @@ void setup() {
   if (!datalog.write(HEADER_STRING))
     led.setStatus(led.RED);
 
-  if(!gps.initialize(&gpsData))
-    led.setStatus(led.RED);
+  #if (USING_GPS)
+    if(!gps.initialize(&gpsData))
+      led.setStatus(led.RED);
 
-  //wait for the gps to get a fix before starting up
-  while(!gpsData.fix)
-    gps.read(&gpsData); 
-
+    //wait for the gps to get a fix before starting up
+    while(!gpsData.fix)
+      gps.read(&gpsData);
+  #else
+    gpsData = {};
+  #endif
+  
   for (int i=0; i<10; i++){
     led.setStatus(led.OFF);
     delay(500);
@@ -120,7 +129,9 @@ void setup() {
 
 void loop() {
   //update essential data every loop
-  gps.read(&gpsData);
+  #if (USING_GPS)
+    gps.read(&gpsData);
+  #endif
 
   //stop actuator if it is moving and about to hit its endpoints
   if (valveIsOpen && actuator.position() < actuator.START) //if valve has finished opening, turn it off
