@@ -6,33 +6,33 @@ COMMAND HELIOS ABORT BIG_ENDIAN "Helios Abort All"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 1} %>
   
-COMMAND HELIOS OPEN30 BIG_ENDIAN "Helios Open 30 Seconds"
+COMMAND HELIOS OPEN30 BIG_ENDIAN "Helios Open 20 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 2} %>
   
-COMMAND HELIOS OPEN60 BIG_ENDIAN "Helios Open 60 Seconds"
+COMMAND HELIOS OPEN60 BIG_ENDIAN "Helios Open 30 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 3} %>
   
-COMMAND HELIOS OPEN90 BIG_ENDIAN "Helios Open 90 Seconds"
+COMMAND HELIOS OPEN90 BIG_ENDIAN "Helios Open 40 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 4} %>
 
-COMMAND HELIOS OPEN120 BIG_ENDIAN "Helios Open 2 Minutes"
+COMMAND HELIOS OPEN120 BIG_ENDIAN "Helios Open 60 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 5} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 6} %>
   
-COMMAND HELIOS OPEN180 BIG_ENDIAN "Helios Open 3 Minutes"
-  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 7} %>
-  
-COMMAND HELIOS OPEN240 BIG_ENDIAN "Helios Open 4 Minutes"
+COMMAND HELIOS OPEN180 BIG_ENDIAN "Helios Open 90 Seconds"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 9} %>
   
-COMMAND HELIOS OPEN300 BIG_ENDIAN "Helios Open 5 Minutes"
+COMMAND HELIOS OPEN240 BIG_ENDIAN "Helios Open 2 Minutes"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
-  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 11} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 12} %>
+  
+COMMAND HELIOS OPEN300 BIG_ENDIAN "Helios Open 3 Minutes"
+  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 18} %>
   
 COMMAND HELIOS OPENALL BIG_ENDIAN "Helios Open Permanently"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>

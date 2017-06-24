@@ -45,7 +45,7 @@ class XBEE{
       } else if (command == 1){ //this is the abort command
         lastCommand = COMMAND_ABORT;
         return 1;
-      } else if (command == 127){ //this is the reverse fan command
+      } else if (command == 255){ //this is the reverse fan command
         lastCommand = COMMAND_REVERSE;
         lastCommandedTime = TIME_TO_OPEN_REVERSE;
         return 1;
