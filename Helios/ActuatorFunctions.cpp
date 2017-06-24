@@ -1,4 +1,11 @@
 #include <Arduino.h>
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
 
 class Actuator{ //static class
 
@@ -19,6 +26,7 @@ class Actuator{ //static class
       pinMode(PIN_ACTUATOR_B, OUTPUT);
       pinMode(PIN_ACTUATOR_PWM, OUTPUT);
       pinMode(PIN_ACTUATOR_READ, INPUT);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Valve pins have been initialized");
       return 1;
     }
 
@@ -27,26 +35,26 @@ class Actuator{ //static class
     }
 
     static uint8_t openValve(void){//opens the valve by retracting the piston
-      //Serial.println("Opening Valve");
       digitalWrite(PIN_ACTUATOR_A, HIGH);
       digitalWrite(PIN_ACTUATOR_B, LOW);
       digitalWrite(PIN_ACTUATOR_PWM, HIGH);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Valve Opening");
       return 1;
     }
 
-    static uint8_t closeValve(void){//closes the valve by extending the piston
-      //Serial.println("Closing Valve");  
+    static uint8_t closeValve(void){//closes the valve by extending the piston 
       digitalWrite(PIN_ACTUATOR_A, LOW);
       digitalWrite(PIN_ACTUATOR_B, HIGH);
       digitalWrite(PIN_ACTUATOR_PWM, HIGH);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Valve Closing");
       return 0;
     }
 
     static void stopValve(void){//puts zero voltage on each side of valve
-      //Serial.println("Turning Valve Off");
       digitalWrite(PIN_ACTUATOR_A, LOW);
       digitalWrite(PIN_ACTUATOR_B, LOW);
       digitalWrite(PIN_ACTUATOR_PWM, LOW);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Valve off");
     }
 };
 

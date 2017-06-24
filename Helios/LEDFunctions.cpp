@@ -1,10 +1,18 @@
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
+
 class LED{
   private:
     Adafruit_NeoPixel myled;
-    const int PIN_LED = A5;
+    const int PIN_LED = A0;
 
   public:
 
@@ -32,11 +40,13 @@ class LED{
       myled.begin();
       myled.show(); //initialize the status led
       setStatus(OFF);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Status LED initialized");
     }
 
     void setStatus(uint32_t color){
       myled.setPixelColor(0, color);
       myled.show();
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("LED status changed");
     }
 };
 /*     

@@ -1,5 +1,13 @@
 #include <Arduino.h>
 
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
+
 class Motor{ //static class
 
   private:
@@ -16,28 +24,32 @@ class Motor{ //static class
       pinMode(PIN_MOTOR_A, OUTPUT);
       pinMode(PIN_MOTOR_B, OUTPUT);
       pinMode(PIN_MOTOR_PWM, OUTPUT);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Motor pins have been initialized");
       return 1;
     }
 
     static void startFan(void){//turns fan on to prespecified speed
-      Serial.println("Turning fan on");
+      //Serial.println("Turning fan on");
       digitalWrite(PIN_MOTOR_A, HIGH);
       digitalWrite(PIN_MOTOR_B, LOW);
       analogWrite(PIN_MOTOR_PWM, MOTOR_SPEED);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Fan is now on");
     }
 
     static void reverseFan(void){//turns fan on to prespecified speed
-      Serial.println("Turning fan on");
+      //Serial.println("Turning fan on");
       digitalWrite(PIN_MOTOR_A, LOW);
       digitalWrite(PIN_MOTOR_B, HIGH);
       analogWrite(PIN_MOTOR_PWM, MOTOR_SPEED);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Fan is now running in reverse");
     }
 
     static void stopFan(void){//turns fan off
-      Serial.println("Turning fan off");
+      //Serial.println("Turning fan off");
       digitalWrite(PIN_MOTOR_A, LOW);
       digitalWrite(PIN_MOTOR_B, LOW);
       analogWrite(PIN_MOTOR_PWM, 0);
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Fan is now off");
     }
 };
 

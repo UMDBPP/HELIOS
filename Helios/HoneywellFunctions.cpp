@@ -1,6 +1,14 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
+
 //Data structure
 struct MY_HONEYWELL{
   float pressure;
@@ -38,6 +46,7 @@ class Honeywell{ //static class
       Wire.begin();
       data[0] = {};
       data[1] = {};
+      if (HELIOS_DEBUG) DEBUG_SERIAL.println("Two honeywell sensors initialized");
       return 1;
     }
 

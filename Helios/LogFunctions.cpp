@@ -2,24 +2,32 @@
 #include <SD.h>
 #include <Arduino.h>
 
+#ifndef HELIOS_DEBUG
+#define HELIOS_DEBUG true
+#endif
+
+#ifndef DEBUG_SERIAL
+#define DEBUG_SERIAL Serial
+#endif
+
 class Datalog{ //static class
 
   private:
     #define FILE_NAME "Datalog.txt"
-    const static int SD_CHIP_SELECT = 4;
+    const static int SD_CHIP_SELECT = 53; //chip select for SPI card writer on a balloonduino
     
   public:
 
     Datalog(){}
   
     static int initialize(){
-      Serial.print("\n\nInitializing SD card...");
+      if (HELIOS_DEBUG) DEBUG_SERIAL.print("Initializing SD card...");
       if (!SD.begin(SD_CHIP_SELECT)) {
-        Serial.println("Card failed, or not present");
+        if (HELIOS_DEBUG) DEBUG_SERIAL.println("Card failed, or not present");
         return 0;
       }
       else{
-        Serial.println("card initialized.");
+        if (HELIOS_DEBUG) DEBUG_SERIAL.println("card initialized.");
         return 1;
       }
     }
@@ -28,12 +36,12 @@ class Datalog{ //static class
       File dataFile = SD.open(FILE_NAME, FILE_WRITE);
       if (dataFile) {// if the file is available, write to it:
         dataFile.println(str);
-        Serial.println(str);
+        if (HELIOS_DEBUG) DEBUG_SERIAL.println(str);
         dataFile.close();
         return 1;
       }
       else { // if the file isn't open, pop up an error:
-        Serial.println("error opening datalog.txt");
+        if (HELIOS_DEBUG) DEBUG_SERIAL.println("error opening datalog.txt");
         dataFile.close();
         return 0;
       }

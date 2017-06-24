@@ -1,6 +1,14 @@
 /*Now using in house custom Balloonduino board*/
 
+//confirmed that SD card writer works correctly
+//confirmed that gps works correctly
+//confirmed that xbee works correctly
+
 #define USING_GPS true
+#define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well
+#define DEBUG_MODE true //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
+#define DEBUG_SERIAL Serial
+#define GPS_Serial Serial1
 
 //Import Custom Libraries
 #include "GPSFunctions.cpp"
@@ -46,8 +54,11 @@ MY_GPS gpsData;
 //For log timing
 uint32_t log_timer;
 
-//For command timing
+//For xbee command timing
 uint32_t command_timer;
+
+//Required for GPS to work
+Adafruit_GPS GPS(&GPS_Serial);
 
 //Create objects
 LED led;
@@ -59,6 +70,37 @@ Motor motor;
 #if (USING_GPS)
   AGPS gps;
 #endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if DEBUG_MODE  //if we are in debug mode, skip turning on everything
+
+void setup(){
+  delay(5000);
+  Serial.begin(115200);
+  pinMode(13, OUTPUT);
+
+  if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
+  if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
+  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");
+
+}
+
+void loop(){
+  //digitalWrite(13, HIGH);
+  //delay(1000);
+  //datalog.write("This is a test\n");
+  //delay(1000);
+
+  if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){
+    xbeeCommand();
+    command_timer = millis();
+  }
+  gps.read(&gpsData, &GPS);
+  
+}
+
+#else //if we are not in debug mode, then run normal sequence
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
@@ -106,12 +148,12 @@ void setup() {
     led.setStatus(led.RED);
 
   #if (USING_GPS)
-    if(!gps.initialize(&gpsData))
+    if(!gps.initialize(&gpsData, &GPS))
       led.setStatus(led.RED);
 
     //wait for the gps to get a fix before starting up
     while(!gpsData.fix)
-      gps.read(&gpsData);
+      gps.read(&gpsData, &GPS);
   #else
     gpsData = {};
   #endif
@@ -129,7 +171,7 @@ void setup() {
 void loop() {
   //update essential data every loop
   #if (USING_GPS)
-    gps.read(&gpsData);
+    gps.read(&gpsData, &GPS);
   #endif
 
   //stop actuator if it is moving and about to hit its endpoints
@@ -166,16 +208,23 @@ void loop() {
   }
 }
 
+#endif  //this ends the if/else sequence used while debugging
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Below are assisting functions which are included in this file because they have access to global variables
+
 void xbeeCommand(){
-  if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA)
+  if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){
     xbee.sendData(gpsData.altitude, ascentVelocity);
+    if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee data sent");
+  }
   else if (xbee.getLastCommand() == xbee.COMMAND_ABORT){
     valveAlreadyClosed = 1;
     motor.stopFan();
     valveIsOpen = actuator.closeValve();
     xbee.sendConf(xbee.CONFIRM_CODE_ABORT);
+    if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee has commanded abort");
   }else if (xbee.getLastCommand() == xbee.COMMAND_REVERSE){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
@@ -184,6 +233,7 @@ void xbeeCommand(){
     valveTimeAtOpen = millis();
     valveHasOpened = 1;
     xbee.sendConf(xbee.CONFIRM_CODE_REVERSE);
+    if(HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
   }else if (xbee.getLastCommand() == xbee.COMMAND_OPEN_NOW){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
@@ -192,6 +242,7 @@ void xbeeCommand(){
     valveTimeAtOpen = millis();
     valveHasOpened = 1;
     xbee.sendConf(timeOpen);
+    if (HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
   }
 }
 
