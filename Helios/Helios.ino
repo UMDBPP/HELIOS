@@ -1,7 +1,6 @@
 /*Now using in house custom Balloonduino board*/
 
-#define USING_GPS false
-
+#define USING_GPS true
 
 //Import Custom Libraries
 #include "GPSFunctions.cpp"

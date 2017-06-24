@@ -27,7 +27,7 @@ class LED{
 
 
   
-    int initialize(){
+    void initialize(){
       myled = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
       myled.begin();
       myled.show(); //initialize the status led
