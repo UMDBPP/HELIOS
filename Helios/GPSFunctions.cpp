@@ -1,11 +1,11 @@
 //#include <Adafruit_Sensor.h>
-#include <Adafruit_GPS.h>
-#include <Arduino.h>
+#include <Adafruit_GPS.h> //include gps library
+#include <Arduino.h>  //include arduino library to recognize keywords
 
 HardwareSerial GPS_Serial =  Serial1; //Pins 18 and 19 on Arduino mega
-Adafruit_GPS GPS(&Serial1);
+Adafruit_GPS GPS(&Serial1); //initialize the gps
 
-//Data structure
+//Data structure for storing gps info
 struct MY_GPS{
   uint8_t hour;
   uint8_t minute;
@@ -33,9 +33,9 @@ struct MY_GPS{
 class AGPS{
 
   private:
-    const static boolean GPSECHO =  false;
+    const static boolean GPSECHO =  false;  //no need to echo the gps raw to serial
     
-    void recordGPS(MY_GPS *gpsData){
+    void recordGPS(MY_GPS *gpsData){  //save current data to the structure indicated by the pointer passed
       gpsData->hour = GPS.hour;//this whole sequence could be more efficient if we were memory limited, but as is, this helps keep data organized and isolated
       gpsData->minute = GPS.minute;
       gpsData->second = GPS.seconds;
@@ -44,7 +44,7 @@ class AGPS{
       gpsData->month = GPS.month;
       gpsData->year = 2000+GPS.year;
       gpsData->fix = GPS.fix;
-      if(GPS.fix){
+      if(GPS.fix){  //only save location data if we have a fix
         gpsData->latitude_deg = GPS.latitude/100;
         gpsData->latitude_min = GPS.latitude - 100*gpsData->latitude_deg;
         gpsData->latitude_dir = GPS.lat;
@@ -60,33 +60,33 @@ class AGPS{
 
   public:
 
-    AGPS(){}
+    AGPS(){}  //constructor that does nothing
     
-    int initialize(MY_GPS *gpsData){
-      TIMSK0 &= ~_BV(OCIE0A);
-      GPS.begin(9600);
-      GPS.sendCommand("$PGCMD,33,0*6D");
+    int initialize(MY_GPS *gpsData){  //initialize the gps
+      TIMSK0 &= ~_BV(OCIE0A); //disable the interrupt option
+      GPS.begin(9600);  //begin serial communication with gps
+      GPS.sendCommand("$PGCMD,33,0*6D");  //startup gps
       GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA); //turn on RMC (recommended minimum) and GGA (fix data) including altitude
       GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
       //GPS.sendCommand(PGCMD_ANTENNA); // Request updates on antenna status, comment out to keep quiet
       //GPS_Serial.println(PMTK_Q_RELEASE);  // Ask for firmware version
       //useInterrupt(true);
 
-      while(!GPS.newNMEAreceived()){
+      while(!GPS.newNMEAreceived()){  //wait to get a fix before progressing, this may be disabled to decrease startup time
         char c = GPS.read();
       }
-      gpsData = {};
-      return 1;
+      gpsData = {}; //initailize the structure to all zeros
+      return 1; //return successful
     }
 
-    void read(MY_GPS *gpsData){
-      char c = GPS.read();
-      if (GPSECHO)
+    void read(MY_GPS *gpsData){ //function to read data and save it to the pointer passed
+      char c = GPS.read();  //read the gps
+      if (GPSECHO)  //echo the raw data if true
         if (c) Serial.print(c);
-      if (GPS.newNMEAreceived()) {
+      if (GPS.newNMEAreceived()) {  //if there is new data, try to parse it
         if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
           ; // we can fail to parse a sentence in which case we should just wait for another
-        recordGPS(gpsData);  
+        recordGPS(gpsData);  //if there is new data we will record it, if not, this will simply write the old data again
       }
     }
 };
