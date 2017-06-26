@@ -11,10 +11,10 @@
 class Motor{ //static class
 
   private:
-    const static int PIN_MOTOR_A = 12; // Turning PIN_A high will make the motor blow air out of the balloon
-    const static int PIN_MOTOR_B = 13;
-    const static int PIN_MOTOR_PWM = 11;
-    const static int MOTOR_SPEED = 255; //PWM oscillation between 0 and 255
+    const static int PIN_MOTOR_A = 5; // Turning PIN_A high will make the motor blow air out of the balloon
+    const static int PIN_MOTOR_B = 6;
+    const static int PIN_MOTOR_PWM = 4;
+    const static int MOTOR_SPEED = 100; //PWM oscillation between 0 and 255
 
   public:
 

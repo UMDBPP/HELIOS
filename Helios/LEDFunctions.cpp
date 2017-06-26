@@ -12,7 +12,7 @@
 class LED{
   private:
     Adafruit_NeoPixel myled;
-    const int PIN_LED = A0;
+    const int PIN_LED = 17;
 
   public:
 

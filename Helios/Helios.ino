@@ -79,6 +79,7 @@ void setup(){
   delay(5000);
   Serial.begin(115200);
   pinMode(13, OUTPUT);
+  pinMode(12, OUTPUT);
 
   if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
   if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
@@ -87,7 +88,8 @@ void setup(){
 }
 
 void loop(){
-  //digitalWrite(13, HIGH);
+  digitalWrite(13, HIGH);
+  digitalWrite(12, LOW);
   //delay(1000);
   //datalog.write("This is a test\n");
   //delay(1000);
