@@ -9,38 +9,35 @@
 #define DEBUG_SERIAL Serial
 #endif
 
-class LED{
+class ALED{
   private:
-    Adafruit_NeoPixel myled;
     const int PIN_LED = 17;
+    Adafruit_NeoPixel myled = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
 
   public:
 
-    LED(){} //constructor
+    ALED(){} //constructor
 
     static uint32_t Color(uint8_t r, uint8_t g, uint8_t b) {
       return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
     }
 
-    const static uint32_t OFF = (0 << 16) | (0 << 8) | 0;
-    const static uint32_t BLUE = (0 << 16) | (0 << 8) | 255;
-    const static uint32_t GREEN = (0 << 16) | (255 << 8) | 0;
-    const static uint32_t RED = (255 << 16) | (0 << 8) | 0;
-    const static uint32_t WHITE = (255 << 16) | (255 << 8) | 255;
-    const static uint32_t YELLOW = (255 << 16) | (255 << 8) | 0;
-    const static uint32_t PURPLE = (0 << 16) | (255 << 8) | 255;
-    const static uint32_t TURQUOISE = (255 << 16) | (0 << 8) | 255;
-    const static uint32_t ORANGE = (128 << 16) | (255 << 8) | 0;
-    const static uint32_t HOTPINK = (100 << 16) | (255 << 8) | 180;
-
-
+    static const uint32_t OFF = 0;
+    static const uint32_t BLUE = 255;
+    static const uint32_t GREEN = 65280;
+    static const uint32_t RED = 16711680;
+    static const uint32_t WHITE = 16777215;
+    static const uint32_t YELLOW = 16776960;
+    static const uint32_t TURQOISE = 65535;
+    static const uint32_t PURPLE = 16711935;
+    static const uint32_t ORANGE = 8388863;
+    static const uint32_t HOTPINK = 6619060;
   
     void initialize(){
-      myled = Adafruit_NeoPixel(1, PIN_LED, NEO_GRB + NEO_KHZ800);
       myled.begin();
       myled.show(); //initialize the status led
-      setStatus(OFF);
       if (HELIOS_DEBUG) DEBUG_SERIAL.println("Status LED initialized");
+      setStatus(OFF);
     }
 
     void setStatus(uint32_t color){
@@ -49,17 +46,3 @@ class LED{
       if (HELIOS_DEBUG) DEBUG_SERIAL.println("LED status changed");
     }
 };
-/*     
-    static const uint32_t OFF = 0;
-    const uint32_t BLUE = 255;
-    const uint32_t GREEN = 65280;
-    const uint32_t RED = 16711680;
-    const uint32_t WHITE = 16777215;
-    const uint32_t YELLOW = 16776960;
-    const uint32_t PURPLE = 65535;
-    const uint32_t TURQUOISE = 16711935;
-    const uint32_t ORANGE = 8388863;
-    const uint32_t HOTPINK = 6619060;
- */
-
-

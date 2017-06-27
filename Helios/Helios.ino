@@ -20,7 +20,6 @@
 #include "LogFunctions.cpp"
 //#include "BMEFunctions.cpp"
 
-
 //First line printed identifies order of data
 const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed";
 
@@ -61,7 +60,7 @@ uint32_t command_timer;
 Adafruit_GPS GPS(&GPS_Serial);
 
 //Create objects
-LED led;
+ALED led;
 XBEE xbee;
 Actuator actuator;
 Datalog datalog;
@@ -78,27 +77,36 @@ Motor motor;
 void setup(){
   delay(5000);
   Serial.begin(115200);
-  pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
+  led.initialize();
+  delay(1000);
+  led.setStatus(led.RED);
+  delay(1000);
+  led.setStatus(led.BLUE);
+  delay(1000);
+  led.setStatus(led.GREEN);
+  delay(1000);
+  led.setStatus(led.TURQUOISE);
+  delay(1000);
+  led.setStatus(led.YELLOW);
+  delay(1000);
+  led.setStatus(led.WHITE);
+  delay(1000);
+  led.setStatus(led.ORANGE);
 
   if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
-  if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
-  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");
+  /*if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
+  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");*/
 
 }
 
 void loop(){
-  digitalWrite(13, HIGH);
-  digitalWrite(12, LOW);
-  //delay(1000);
-  //datalog.write("This is a test\n");
-  //delay(1000);
+
 
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){
     xbeeCommand();
     command_timer = millis();
   }
-  gps.read(&gpsData, &GPS);
+  //gps.read(&gpsData, &GPS);
   
 }
 
