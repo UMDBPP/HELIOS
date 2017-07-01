@@ -24,7 +24,7 @@
 const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed";
 
 //Control Parameters
-#define VALVE_MOVE_TIME 9000 //milliseconds
+//#define VALVE_MOVE_TIME 9000 //milliseconds
 #define ALTITUDE_TO_OPEN 18000 //meters
 int32_t timeOpen = 20000; //milliseconds
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
@@ -78,25 +78,13 @@ void setup(){
   delay(5000);
   Serial.begin(115200);
   led.initialize();
-  delay(1000);
-  led.setStatus(led.RED);
-  delay(1000);
-  led.setStatus(led.BLUE);
-  delay(1000);
-  led.setStatus(led.GREEN);
-  delay(1000);
-  led.setStatus(led.TURQUOISE);
-  delay(1000);
-  led.setStatus(led.YELLOW);
-  delay(1000);
-  led.setStatus(led.WHITE);
-  delay(1000);
-  led.setStatus(led.ORANGE);
-
+  if(!actuator.initialize()) DEBUG_SERIAL.println("Valve error");
+  if(!motor.initialize()) DEBUG_SERIAL.println("Fan error");
   if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
-  /*if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
-  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");*/
-
+  if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
+  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");
+  if(!honeywell.initialize(&honeywellData)) DEBUG_SERIAL.println("Honeywell Error");
+  delay(1000);
 }
 
 void loop(){
@@ -107,7 +95,21 @@ void loop(){
     command_timer = millis();
   }
   //gps.read(&gpsData, &GPS);
-  
+  uint32_t start = millis();
+  actuator.closeValve();
+  while (millis() - start < 2000)
+    Serial.println(actuator.position());
+  actuator.stopValve();
+  led.setStatus(led.RED);
+  start = millis();
+  actuator.openValve();
+  while (millis() - start < 2000)
+    Serial.println(actuator.position());
+  actuator.stopValve();
+  motor.startFan();
+  delay(5000);
+  motor.stopFan();
+  led.setStatus(led.GREEN);
 }
 
 #else //if we are not in debug mode, then run normal sequence

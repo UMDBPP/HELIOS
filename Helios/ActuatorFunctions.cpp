@@ -10,9 +10,9 @@
 class Actuator{ //static class
 
   private:
-    const static int PIN_ACTUATOR_A = 2; //Turning PIN_A high will make the actuator extend
-    const static int PIN_ACTUATOR_B = 3;
-    const static int PIN_ACTUATOR_PWM = 1;
+    const static int PIN_ACTUATOR_A = 3; //Turning PIN_A high will make the actuator extend
+    const static int PIN_ACTUATOR_B = 2;
+    const static int PIN_ACTUATOR_PWM = 5;
     const static int PIN_ACTUATOR_READ = A0;
     
   public:
