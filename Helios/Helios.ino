@@ -74,7 +74,6 @@ Motor motor;
   AGPS gps;
 #endif
 
-int64_t act_start = 0;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -145,11 +144,9 @@ void setup() {
 
   //open and close valve
   valveIsOpen = actuator.openValve();
-  act_start = millis();
-  while((millis() - act_start) < 4000); //wait for the valve to close, then turn it off
+  while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
   valveIsOpen = actuator.closeValve();
-  act_start = millis();
-  while((millis() - act_start) < 4500); //wait for the valve to close, then turn it off
+  while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
   actuator.stopValve();
 
   led.setStatus(led.BLUE);
@@ -195,7 +192,6 @@ void setup() {
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
   }
   Serial.println("Starting Main Loop");
-  //act_start = valveTimeAtOpen;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,9 +211,9 @@ void loop() {
   if (gpsData.fix)
     led.setStatus(led.OFF);
   //stop actuator if it is moving and about to hit its endpoints
-  if (valveIsOpen && (millis() - act_start) > 5000) //if valve has finished opening, turn it off
+  if (valveIsOpen && actuator.position() < actuator.START) //if valve has finished opening, turn it off
     actuator.stopValve();
-  if (!valveIsOpen && (millis() - act_start) > 10000) //if valve has finished closing, turn it off
+  if (!valveIsOpen && actuator.position() > actuator.END) //if valve has finished closing, turn it off
     actuator.stopValve();
   //Serial.println("Loop"); 
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){
@@ -237,7 +233,6 @@ void loop() {
     }
     if(valveAltitudeCheckCounter >= NUM_OF_CHECKS_BEFORE_OPEN && !valveHasOpened){//if it is time to open the valve
       actuator.openValve();//this causes a 3 second delay where no data is taken.
-      act_start = millis();
       motor.startFan();
       valveTimeAtOpen = millis();
       valveHasOpened=1;
@@ -246,7 +241,6 @@ void loop() {
       valveAlreadyClosed=1;
       motor.stopFan();
       valveIsOpen = actuator.closeValve();
-      act_start = millis();
     }
   }
   //Serial.println("Loop A");
@@ -267,13 +261,11 @@ void xbeeCommand(){
     valveAlreadyClosed = 1;
     motor.stopFan();
     valveIsOpen = actuator.closeValve();
-    act_start = millis();
     xbee.sendConf(xbee.CONFIRM_CODE_ABORT);
     if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee has commanded abort");
   }else if (xbee.getLastCommand() == xbee.COMMAND_REVERSE){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
-    act_start = millis();
     motor.reverseFan();
     timeOpen = xbee.getCommandedTime();
     valveTimeAtOpen = millis();
@@ -283,7 +275,6 @@ void xbeeCommand(){
   }else if (xbee.getLastCommand() == xbee.COMMAND_OPEN_NOW){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
-    act_start = millis();
     motor.startFan();
     timeOpen = xbee.getCommandedTime();
     valveTimeAtOpen = millis();
