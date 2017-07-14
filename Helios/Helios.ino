@@ -6,7 +6,7 @@
 
 #define USING_GPS true
 #define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well
-#define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
+#define DEBUG_MODE true //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
 #define DEBUG_SERIAL Serial
 #define GPS_Serial Serial1
 
@@ -81,13 +81,13 @@ Motor motor;
 
 void setup(){
   delay(5000);
-  Serial.begin(115200);
+  Serial.begin(115200);/*
   led.initialize();
   if(!actuator.initialize()) DEBUG_SERIAL.println("Valve error");
   if(!motor.initialize()) DEBUG_SERIAL.println("Fan error");
   if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
   if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
-  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");
+  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");*/
   if(!honeywell.initialize(&honeywellData)) DEBUG_SERIAL.println("Honeywell Error");
   delay(1000);
 }
@@ -282,6 +282,7 @@ void xbeeCommand(){
     xbee.sendConf(timeOpen);
     if (HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
   }
+  datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()) + ", " + (String)(xbee.getCommandedTime()));
 }
 
 void logData(){

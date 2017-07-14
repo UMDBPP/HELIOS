@@ -24,6 +24,9 @@ class Motor{ //static class
       pinMode(PIN_MOTOR_A, OUTPUT);
       pinMode(PIN_MOTOR_B, OUTPUT);
       pinMode(PIN_MOTOR_PWM, OUTPUT);
+      digitalWrite(PIN_MOTOR_A, LOW);
+      digitalWrite(PIN_MOTOR_B, LOW);
+      digitalWrite(PIN_MOTOR_PWM, LOW);
       if (HELIOS_DEBUG) DEBUG_SERIAL.println("Motor pins have been initialized");
       return 1;
     }

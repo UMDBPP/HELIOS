@@ -25,6 +25,9 @@ class Actuator{ //static class
       pinMode(PIN_ACTUATOR_A, OUTPUT);
       pinMode(PIN_ACTUATOR_B, OUTPUT);
       pinMode(PIN_ACTUATOR_PWM, OUTPUT);
+      digitalWrite(PIN_ACTUATOR_A, LOW);
+      digitalWrite(PIN_ACTUATOR_B, LOW);
+      digitalWrite(PIN_ACTUATOR_PWM, LOW);
       pinMode(A0, INPUT);
       if (HELIOS_DEBUG) DEBUG_SERIAL.println("Valve pins have been initialized");
       return 1;
