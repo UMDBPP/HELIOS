@@ -28,7 +28,7 @@ const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Milli
 //Control Parameters
 //#define VALVE_MOVE_TIME 9000 //milliseconds
 #define ALTITUDE_TO_OPEN 18000 //meters
-int32_t timeOpen = 40000; //milliseconds
+int32_t timeOpen = 60000; //milliseconds
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging
 #define ASCENT_CALC_FREQUENCY 10 //this is the number of times we will log data before we will recalculate the ascent velocity
