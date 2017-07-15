@@ -6,7 +6,7 @@
 
 #define USING_GPS true
 #define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well
-#define DEBUG_MODE true //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
+#define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
 #define DEBUG_SERIAL Serial
 #define GPS_Serial Serial1
 
@@ -51,7 +51,7 @@ unsigned long oldTime = 0;
 uint8_t logsCounter = 0;
 
 //Data structures
-MY_HONEYWELL* honeywellData = new MY_HONEYWELL[2];
+MY_HONEYWELL honeywellData[2];
 MY_GPS gpsData;
 
 //For log timing
@@ -74,7 +74,6 @@ Motor motor;
   AGPS gps;
 #endif
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if DEBUG_MODE  //if we are in debug mode, skip turning on everything
@@ -88,18 +87,17 @@ void setup(){
   if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
   if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
   if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");*/
-  if(!honeywell.initialize(&honeywellData)) DEBUG_SERIAL.println("Honeywell Error");
+  if(!honeywell.initialize(&honeywellData[0], &honeywellData[1])) DEBUG_SERIAL.println("Honeywell Error");
   delay(1000);
 }
 
 void loop(){
-
   honeywell.read(&honeywellData[honeywell.INSIDE_SENSOR], honeywell.INSIDE_SENSOR);
   Serial.print("Inside: ");
-  Serial.println(honeywellData[honeywell.INSIDE_SENSOR].pressure);
+  Serial.println(honeywellData[honeywell.INSIDE_SENSOR].pressure, DEC);
   honeywell.read(&honeywellData[honeywell.OUTSIDE_SENSOR], honeywell.OUTSIDE_SENSOR);
   Serial.print("Outside: ");
-  Serial.println(honeywellData[honeywell.OUTSIDE_SENSOR].pressure);
+  Serial.println(honeywellData[honeywell.OUTSIDE_SENSOR].pressure, DEC);
   /*
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){
     xbeeCommand();
@@ -159,7 +157,7 @@ void setup() {
   delay(2000);
   motor.stopFan();
 
-  if(!honeywell.initialize(&honeywellData))
+  if(!honeywell.initialize(&honeywellData[0], &honeywellData[1]))
     led.setStatus(led.RED);
 
   /*if(!bme.initialize())
@@ -286,8 +284,8 @@ void xbeeCommand(){
 }
 
 void logData(){
-  //honeywell.read(&honeywellData[honeywell.INSIDE_SENSOR], honeywell.INSIDE_SENSOR);
-  //honeywell.read(&honeywellData[honeywell.OUTSIDE_SENSOR], honeywell.OUTSIDE_SENSOR);
+  honeywell.read(&honeywellData[honeywell.INSIDE_SENSOR], honeywell.INSIDE_SENSOR);
+  honeywell.read(&honeywellData[honeywell.OUTSIDE_SENSOR], honeywell.OUTSIDE_SENSOR);
   /*getBME(2);
   getBME(3);
   getBME(4);*/
@@ -325,18 +323,18 @@ void logData(){
   dataString += (String)gpsData.altitude + ",";
   dataString += (String)gpsData.satellites + ",";
   
-  /*dataString += (String)honeywellData[0].pressure + ",";
-  dataString += (String)honeywellData[0].temperature + ",";
-  dataString += (String)honeywellData[0].status + ",";
-  dataString += (String)honeywellData[0].rawPressure + ",";
-  dataString += (String)honeywellData[0].rawTemperature + ",";
+  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].pressure + ",";
+  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].temperature + ",";
+  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].status + ",";
+  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].rawPressure + ",";
+  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].rawTemperature + ",";
 
-  dataString += (String)honeywellData[1].pressure + ",";
-  dataString += (String)honeywellData[1].temperature + ",";
-  dataString += (String)honeywellData[1].status + ",";
-  dataString += (String)honeywellData[1].rawPressure + ",";
-  dataString += (String)honeywellData[1].rawTemperature + ",";
-  */
+  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].pressure + ",";
+  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].temperature + ",";
+  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].status + ",";
+  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].rawPressure + ",";
+  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].rawTemperature + ",";
+  
   /*dataString += (String)bmeData[0].pressure + ",";
   dataString += (String)bmeData[0].temperature + ",";
   dataString += (String)bmeData[0].humidity + ",";
