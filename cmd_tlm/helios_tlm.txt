@@ -13,9 +13,19 @@ TELEMETRY HELIOS CONF_PKT BIG_ENDIAN "Helios Valve Confirmation"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 850} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>
   APPEND_ITEM Number 16 UINT "Transmission Number"
-  APPEND_ITEM Time 32 INT "Time Open"
+  APPEND_ITEM Type 8 UINT "Confirmed command receipt"
+    STATE SUCCESSFUL_VENT 0
     STATE SUCCESSFUL_ABORT 1
-    STATE SUCCESSFUL_REVERSE 200
+    STATE SUCCESSFUL_REVERSE 2
+    STATE SUCCESSFUL_ARMED 3
+    STATE SUCCESSFUL_SET_VAR 4
+    STATE SUCCESSFUL_TEST 5
+    STATE SUCCESSFUL_KILL 6
+  APPEND_ITEM Time 32 INT "Time Open"
+    STATE FAN_FWD 1
+    STATE FAN_REV 2
+    STATE VALVE_OPEN 3
+    STATE VALVE_CLOSE 4
 	UNITS milliSecond ms
 	FORMAT_STRING "%0.6f"
 	

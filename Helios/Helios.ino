@@ -27,7 +27,7 @@ const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Milli
 
 //Control Parameters
 //#define VALVE_MOVE_TIME 9000 //milliseconds
-#define ALTITUDE_TO_OPEN 18000 //meters
+int32_t altitudeToOpen = 18000; //meters
 int32_t timeOpen = 60000; //milliseconds
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging
@@ -60,9 +60,6 @@ uint32_t log_timer = 0;
 //For xbee command timing
 uint32_t command_timer= 0;
 
-//Required for GPS to work
-Adafruit_GPS GPS(&GPS_Serial);
-
 //Create objects
 ALED led;
 XBEE xbee;
@@ -71,6 +68,8 @@ Datalog datalog;
 Honeywell honeywell;
 Motor motor;
 #if (USING_GPS)
+  //Required for GPS to work
+  Adafruit_GPS GPS(&GPS_Serial);
   AGPS gps;
 #endif
 
@@ -226,7 +225,7 @@ void loop() {
   //Serial.println("Loop L");
   //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for timeOpen seconds
   if(!valveAlreadyClosed){//if the valve has not already been opened and closed
-    if(gpsData.altitude > ALTITUDE_TO_OPEN){
+    if(gpsData.altitude > altitudeToOpen){
       valveAltitudeCheckCounter++;//add to the altitude verifier
     }
     if(valveAltitudeCheckCounter >= NUM_OF_CHECKS_BEFORE_OPEN && !valveHasOpened){//if it is time to open the valve
@@ -251,7 +250,13 @@ void loop() {
 //Below are assisting functions which are included in this file because they have access to global variables
 
 void xbeeCommand(){
-  if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){
+  if (xbee.getLastCommand() == xbee.COMMAND_ENABLE){
+    valveAlreadyClosed = 0;
+    valveAltitudeCheckCounter = 0;
+    valveHasOpened = 0;
+    xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, timeOpen);
+    xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, altitudeToOpen);
+  }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){
     xbee.sendData(gpsData.altitude, ascentVelocity);
     if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee data sent");
   }
@@ -259,26 +264,47 @@ void xbeeCommand(){
     valveAlreadyClosed = 1;
     motor.stopFan();
     valveIsOpen = actuator.closeValve();
-    xbee.sendConf(xbee.CONFIRM_CODE_ABORT);
+    xbee.sendConf(xbee.CONFIRM_CODE_ABORT, 0);
     if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee has commanded abort");
-  }else if (xbee.getLastCommand() == xbee.COMMAND_REVERSE){
-    valveAlreadyClosed = 0;
-    valveIsOpen = actuator.openValve();
-    motor.reverseFan();
-    timeOpen = xbee.getCommandedTime();
-    valveTimeAtOpen = millis();
-    valveHasOpened = 1;
-    xbee.sendConf(xbee.CONFIRM_CODE_REVERSE);
-    if(HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
-  }else if (xbee.getLastCommand() == xbee.COMMAND_OPEN_NOW){
+  }else if (xbee.getLastCommand() == xbee.COMMAND_VENT_NOW){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
     motor.startFan();
     timeOpen = xbee.getCommandedTime();
     valveTimeAtOpen = millis();
     valveHasOpened = 1;
-    xbee.sendConf(timeOpen);
+    xbee.sendConf(xbee.CONFIRM_CODE_VENT, timeOpen);
     if (HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){
+    timeOpen = xbee.getCommandedTime();
+    xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, timeOpen);
+  }else if (xbee.getLastCommand() == xbee.COMMAND_SET_ALT){
+    altitudeToOpen = xbee.getCommandedTime();
+    xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, -1*altitudeToOpen);
+  }else if (xbee.getLastCommand() == xbee.COMMAND_REVERSE_NOW){
+    valveAlreadyClosed = 0;
+    valveIsOpen = actuator.openValve();
+    motor.reverseFan();
+    timeOpen = xbee.getCommandedTime();
+    valveTimeAtOpen = millis();
+    valveHasOpened = 1;
+    xbee.sendConf(xbee.CONFIRM_CODE_REVERSE, timeOpen);
+    if(HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){
+    actuator.openValve();
+    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_OPEN);
+  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_CLOSE){
+    actuator.closeValve();
+    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_CLOSE);
+  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_FWD){
+    motor.startFan();
+    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_FWD);
+  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
+    motor.reverseFan();
+    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV)
+  }else if (xbee.getLastCommand() == xbee.COMMAND_KILL){
+    // make a kill switch in the LVC maybe
+    xbee.sendConf(xbee.CONFIRM_CODE_KILL, 0);
   }
   datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()) + ", " + (String)(xbee.getCommandedTime()));
 }
