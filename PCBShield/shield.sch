@@ -1743,18 +1743,18 @@ type 0309, grid 2.5 mm</description>
 <wire x1="1.973" y1="0.983" x2="1.973" y2="-0.983" width="0.0508" layer="39"/>
 <wire x1="1.973" y1="-0.983" x2="-1.973" y2="-0.983" width="0.0508" layer="39"/>
 <wire x1="-1.973" y1="-0.983" x2="-1.973" y2="0.983" width="0.0508" layer="39"/>
-<wire x1="-4.5" y1="0" x2="-1.1" y2="0" width="0.3048" layer="1"/>
-<wire x1="1" y1="0" x2="5.1" y2="0" width="0.3048" layer="1"/>
+<wire x1="-4.5" y1="0" x2="-1.1" y2="0" width="0.3048" layer="52"/>
+<wire x1="1" y1="0" x2="5.1" y2="0" width="0.3048" layer="52"/>
 <pad name="1" x="-5.08" y="0" drill="0.8128" diameter="1.6764" shape="octagon"/>
 <pad name="2" x="5.08" y="0" drill="0.8128" diameter="1.6764" shape="octagon"/>
 <text x="-3.048" y="1.524" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 <text x="-3.1306" y="-2.775" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 <rectangle x1="3.175" y1="-0.3048" x2="4.0386" y2="0.3048" layer="21"/>
 <rectangle x1="-4.0386" y1="-0.3048" x2="-3.175" y2="0.3048" layer="21"/>
-<rectangle x1="0.4064" y1="-0.6985" x2="1.0564" y2="0.7015" layer="21"/>
-<rectangle x1="-1.0668" y1="-0.6985" x2="-0.4168" y2="0.7015" layer="21"/>
-<rectangle x1="-1.6254" y1="-0.7" x2="-0.4254" y2="0.7" layer="1"/>
-<rectangle x1="0.4254" y1="-0.7" x2="1.6254" y2="0.7" layer="1"/>
+<rectangle x1="0.4064" y1="-0.6985" x2="1.0564" y2="0.7015" layer="52"/>
+<rectangle x1="-1.0668" y1="-0.6985" x2="-0.4168" y2="0.7015" layer="52"/>
+<rectangle x1="-1.6254" y1="-0.7" x2="-0.4254" y2="0.7" layer="52"/>
+<rectangle x1="0.4254" y1="-0.7" x2="1.6254" y2="0.7" layer="52"/>
 <rectangle x1="-1.7254" y1="-0.8" x2="-0.3254" y2="0.8" layer="29"/>
 <rectangle x1="0.3254" y1="-0.8" x2="1.7254" y2="0.8" layer="29"/>
 <rectangle x1="-1.6254" y1="-0.7" x2="-0.4254" y2="0.7" layer="31"/>
@@ -4040,6 +4040,7 @@ librarian@cadsoft.de</description>
 <pad name="G" x="0" y="5.08" drill="1.4" shape="long" rot="R180"/>
 <pad name="D" x="0" y="2.54" drill="1.4" shape="long"/>
 <pad name="S" x="0" y="0" drill="1.4" shape="long"/>
+<text x="-3.81" y="-2.54" size="1.778" layer="25">&gt;Name</text>
 </package>
 <package name="SANKEN">
 <pad name="P$1" x="0" y="0" drill="1"/>
@@ -4080,34 +4081,34 @@ librarian@cadsoft.de</description>
 <text x="-2.54" y="1.27" size="1.27" layer="25">&gt;Name</text>
 </package>
 <package name="TCA9584A">
-<pad name="SCL1" x="-7.62" y="0" drill="1.016" shape="long"/>
-<pad name="SDA2" x="7.62" y="0" drill="1.016" shape="long"/>
-<pad name="SCL2" x="7.62" y="2.54" drill="1.016" shape="long"/>
-<pad name="SDA3" x="7.62" y="5.08" drill="1.016" shape="long"/>
-<pad name="SCL3" x="7.62" y="7.62" drill="1.016" shape="long"/>
-<pad name="SDA4" x="7.62" y="10.16" drill="1.016" shape="long"/>
-<pad name="SCL4" x="7.62" y="12.7" drill="1.016" shape="long"/>
-<pad name="SDA5" x="7.62" y="15.24" drill="1.016" shape="long"/>
-<pad name="SCL5" x="7.62" y="17.78" drill="1.016" shape="long"/>
-<pad name="SDA6" x="7.62" y="20.32" drill="1.016" shape="long"/>
-<pad name="SCL6" x="7.62" y="22.86" drill="1.016" shape="long"/>
-<pad name="SDA1" x="-7.62" y="2.54" drill="1.016" shape="long"/>
-<pad name="SCL0" x="-7.62" y="5.08" drill="1.016" shape="long"/>
-<pad name="SDA0" x="-7.62" y="7.62" drill="1.016" shape="long"/>
-<pad name="A2" x="-7.62" y="10.16" drill="1.016" shape="long"/>
-<pad name="A1" x="-7.62" y="12.7" drill="1.016" shape="long"/>
-<pad name="A0" x="-7.62" y="15.24" drill="1.016" shape="long"/>
-<pad name="RESET" x="-7.62" y="17.78" drill="1.016" shape="long"/>
-<pad name="SCL" x="-7.62" y="20.32" drill="1.016" shape="long"/>
-<pad name="SDA" x="-7.62" y="22.86" drill="1.016" shape="long"/>
+<pad name="SCL1" x="-7.62" y="0" drill="1.016"/>
+<pad name="SDA2" x="7.62" y="0" drill="1.016"/>
+<pad name="SCL2" x="7.62" y="2.54" drill="1.016"/>
+<pad name="SDA3" x="7.62" y="5.08" drill="1.016"/>
+<pad name="SCL3" x="7.62" y="7.62" drill="1.016"/>
+<pad name="SDA4" x="7.62" y="10.16" drill="1.016"/>
+<pad name="SCL4" x="7.62" y="12.7" drill="1.016"/>
+<pad name="SDA5" x="7.62" y="15.24" drill="1.016"/>
+<pad name="SCL5" x="7.62" y="17.78" drill="1.016"/>
+<pad name="SDA6" x="7.62" y="20.32" drill="1.016"/>
+<pad name="SCL6" x="7.62" y="22.86" drill="1.016"/>
+<pad name="SDA1" x="-7.62" y="2.54" drill="1.016"/>
+<pad name="SCL0" x="-7.62" y="5.08" drill="1.016"/>
+<pad name="SDA0" x="-7.62" y="7.62" drill="1.016"/>
+<pad name="A2" x="-7.62" y="10.16" drill="1.016"/>
+<pad name="A1" x="-7.62" y="12.7" drill="1.016"/>
+<pad name="A0" x="-7.62" y="15.24" drill="1.016"/>
+<pad name="RESET" x="-7.62" y="17.78" drill="1.016"/>
+<pad name="SCL" x="-7.62" y="20.32" drill="1.016"/>
+<pad name="SDA" x="-7.62" y="22.86" drill="1.016"/>
 <wire x1="-8.89" y1="-1.27" x2="8.89" y2="-1.27" width="0.127" layer="21"/>
 <wire x1="8.89" y1="-1.27" x2="8.89" y2="29.21" width="0.127" layer="21"/>
 <wire x1="8.89" y1="29.21" x2="-8.89" y2="29.21" width="0.127" layer="21"/>
 <wire x1="-8.89" y1="29.21" x2="-8.89" y2="-1.27" width="0.127" layer="21"/>
-<pad name="GND" x="-7.62" y="25.4" drill="1.016" shape="long"/>
-<pad name="VIN" x="-7.62" y="27.94" drill="1.016" shape="long"/>
-<pad name="SDA7" x="7.62" y="25.4" drill="1.016" shape="long"/>
-<pad name="SCL7" x="7.62" y="27.94" drill="1.016" shape="long"/>
+<pad name="GND" x="-7.62" y="25.4" drill="1.016"/>
+<pad name="VIN" x="-7.62" y="27.94" drill="1.016"/>
+<pad name="SDA7" x="7.62" y="25.4" drill="1.016"/>
+<pad name="SCL7" x="7.62" y="27.94" drill="1.016"/>
 <text x="-8.89" y="-2.54" size="1.27" layer="25">&gt;Name</text>
 </package>
 <package name="TXB0104">
@@ -5970,8 +5971,8 @@ part number 2062-2P from STA</description>
 <part name="BRIDGE1" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X2" device="" package3d_urn="urn:adsk.eagle:package:22435/2"/>
 <part name="BRIDGE2" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X2" device="" package3d_urn="urn:adsk.eagle:package:22435/2"/>
 <part name="BRIDGE3" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X2" device="" package3d_urn="urn:adsk.eagle:package:22435/2"/>
-<part name="ACT-READ1" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X3" device="" package3d_urn="urn:adsk.eagle:package:22458/2"/>
 <part name="ACT-READ2" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X3" device="" package3d_urn="urn:adsk.eagle:package:22458/2"/>
+<part name="ACT-READ1" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X3" device="" package3d_urn="urn:adsk.eagle:package:22458/2"/>
 <part name="P+23" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 <part name="P+24" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 <part name="GND36" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -6034,6 +6035,7 @@ part number 2062-2P from STA</description>
 <part name="3V_1" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="2.54MM_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1"/>
 <part name="3V_2" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="2.54MM_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1"/>
 <part name="3V_3" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="2.54MM_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1"/>
+<part name="P+28" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6098,7 +6100,7 @@ part number 2062-2P from STA</description>
 <instance part="GND20" gate="1" x="200.66" y="33.02"/>
 <instance part="GND21" gate="1" x="200.66" y="53.34"/>
 <instance part="P+5" gate="VCC" x="154.94" y="66.04"/>
-<instance part="P+6" gate="VCC" x="155.9487875" y="45.484290625"/>
+<instance part="P+6" gate="VCC" x="154.94" y="45.72"/>
 <instance part="P+7" gate="VCC" x="154.94" y="25.4"/>
 <instance part="P+8" gate="1" x="177.8" y="66.04"/>
 <instance part="P+9" gate="1" x="177.8" y="45.72"/>
@@ -6148,8 +6150,8 @@ part number 2062-2P from STA</description>
 <instance part="BRIDGE1" gate="G$1" x="12.7" y="213.36"/>
 <instance part="BRIDGE2" gate="G$1" x="12.7" y="228.6"/>
 <instance part="BRIDGE3" gate="G$1" x="40.64" y="220.98"/>
-<instance part="ACT-READ1" gate="A" x="71.12" y="218.44"/>
-<instance part="ACT-READ2" gate="A" x="71.12" y="238.76"/>
+<instance part="ACT-READ2" gate="A" x="71.12" y="218.44"/>
+<instance part="ACT-READ1" gate="A" x="71.12" y="238.76"/>
 <instance part="P+23" gate="1" x="78.74" y="246.38"/>
 <instance part="P+24" gate="1" x="78.74" y="226.06"/>
 <instance part="GND36" gate="1" x="78.74" y="210.82"/>
@@ -6314,18 +6316,21 @@ part number 2062-2P from STA</description>
 </segment>
 <segment>
 <pinref part="P+10" gate="1" pin="+5V"/>
-<wire x1="172.72" y1="17.78" x2="177.8" y2="17.78" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="17.78" x2="177.8" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="5V_1" gate="G$1" pin="2"/>
+<wire x1="172.72" y1="17.78" x2="177.8" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+9" gate="1" pin="+5V"/>
-<wire x1="172.72" y1="38.1" x2="177.8" y2="38.1" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="38.1" x2="177.8" y2="43.18" width="0.1524" layer="91"/>
+<pinref part="5V_2" gate="G$1" pin="2"/>
+<wire x1="172.72" y1="38.1" x2="177.8" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+8" gate="1" pin="+5V"/>
-<wire x1="172.72" y1="58.42" x2="177.8" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="58.42" x2="177.8" y2="63.5" width="0.1524" layer="91"/>
+<pinref part="5V_3" gate="G$1" pin="2"/>
+<wire x1="172.72" y1="58.42" x2="177.8" y2="58.42" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+11" gate="1" pin="+5V"/>
@@ -6375,13 +6380,13 @@ part number 2062-2P from STA</description>
 <wire x1="101.6" y1="27.94" x2="116.84" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="ACT-READ2" gate="A" pin="1"/>
+<pinref part="ACT-READ1" gate="A" pin="1"/>
 <pinref part="P+23" gate="1" pin="+5V"/>
 <wire x1="68.58" y1="241.3" x2="78.74" y2="241.3" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="241.3" x2="78.74" y2="243.84" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="ACT-READ1" gate="A" pin="1"/>
+<pinref part="ACT-READ2" gate="A" pin="1"/>
 <pinref part="P+24" gate="1" pin="+5V"/>
 <wire x1="68.58" y1="220.98" x2="78.74" y2="220.98" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="220.98" x2="78.74" y2="223.52" width="0.1524" layer="91"/>
@@ -6426,18 +6431,15 @@ part number 2062-2P from STA</description>
 </segment>
 <segment>
 <pinref part="P+5" gate="VCC" pin="VCC"/>
-<wire x1="149.86" y1="58.42" x2="154.94" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="154.94" y1="58.42" x2="154.94" y2="63.5" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="P+6" gate="VCC" pin="VCC"/>
-<wire x1="149.86" y1="38.1" x2="155.9487875" y2="38.1" width="0.1524" layer="91"/>
-<wire x1="155.9487875" y1="38.1" x2="155.9487875" y2="42.944290625" width="0.1524" layer="91"/>
+<pinref part="VIN3" gate="G$1" pin="2"/>
+<wire x1="149.86" y1="58.42" x2="154.94" y2="58.42" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+7" gate="VCC" pin="VCC"/>
-<wire x1="149.86" y1="17.78" x2="154.94" y2="17.78" width="0.1524" layer="91"/>
 <wire x1="154.94" y1="17.78" x2="154.94" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="VIN1" gate="G$1" pin="2"/>
+<wire x1="149.86" y1="17.78" x2="154.94" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+15" gate="VCC" pin="VCC"/>
@@ -6487,6 +6489,12 @@ part number 2062-2P from STA</description>
 <pinref part="H-BRIDGE-2A" gate="G$1" pin="P$10"/>
 <wire x1="171.1887875" y1="281.94" x2="175.26" y2="281.94" width="0.1524" layer="91"/>
 <junction x="170.18" y="281.94"/>
+</segment>
+<segment>
+<pinref part="VIN2" gate="G$1" pin="2"/>
+<wire x1="154.94" y1="38.1" x2="149.86" y2="38.1" width="0.1524" layer="91"/>
+<pinref part="P+6" gate="VCC" pin="VCC"/>
+<wire x1="154.94" y1="38.1" x2="154.94" y2="43.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -6583,8 +6591,8 @@ part number 2062-2P from STA</description>
 </segment>
 <segment>
 <pinref part="GND13" gate="1" pin="GND"/>
-<wire x1="149.86" y1="55.88" x2="154.94" y2="55.88" width="0.1524" layer="91"/>
 <pinref part="VIN3" gate="G$1" pin="1"/>
+<wire x1="149.86" y1="55.88" x2="154.94" y2="55.88" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND14" gate="1" pin="GND"/>
@@ -6694,13 +6702,13 @@ part number 2062-2P from STA</description>
 <pinref part="POT" gate="G$1" pin="P$3"/>
 </segment>
 <segment>
-<pinref part="ACT-READ2" gate="A" pin="3"/>
+<pinref part="ACT-READ1" gate="A" pin="3"/>
 <pinref part="GND37" gate="1" pin="GND"/>
 <wire x1="68.58" y1="236.22" x2="78.74" y2="236.22" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="236.22" x2="78.74" y2="233.68" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="ACT-READ1" gate="A" pin="3"/>
+<pinref part="ACT-READ2" gate="A" pin="3"/>
 <pinref part="GND36" gate="1" pin="GND"/>
 <wire x1="68.58" y1="215.9" x2="78.74" y2="215.9" width="0.1524" layer="91"/>
 <wire x1="78.74" y1="215.9" x2="78.74" y2="213.36" width="0.1524" layer="91"/>
@@ -6872,18 +6880,21 @@ part number 2062-2P from STA</description>
 </segment>
 <segment>
 <pinref part="+3V11" gate="G$1" pin="+3V3"/>
-<wire x1="195.58" y1="17.78" x2="200.66" y2="17.78" width="0.1524" layer="91"/>
 <wire x1="200.66" y1="17.78" x2="200.66" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="3V_1" gate="G$1" pin="2"/>
+<wire x1="195.58" y1="17.78" x2="200.66" y2="17.78" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="+3V10" gate="G$1" pin="+3V3"/>
-<wire x1="195.58" y1="38.1" x2="200.66" y2="38.1" width="0.1524" layer="91"/>
 <wire x1="200.66" y1="38.1" x2="200.66" y2="43.18" width="0.1524" layer="91"/>
+<pinref part="3V_2" gate="G$1" pin="2"/>
+<wire x1="195.58" y1="38.1" x2="200.66" y2="38.1" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="+3V9" gate="G$1" pin="+3V3"/>
-<wire x1="195.58" y1="58.42" x2="200.66" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="200.66" y1="58.42" x2="200.66" y2="63.5" width="0.1524" layer="91"/>
+<pinref part="3V_3" gate="G$1" pin="2"/>
+<wire x1="195.58" y1="58.42" x2="200.66" y2="58.42" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="+3V14" gate="G$1" pin="+3V3"/>
@@ -7528,7 +7539,7 @@ part number 2062-2P from STA</description>
 <wire x1="170.18" y1="165.1" x2="165.1" y2="165.1" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$16" class="0">
+<net name="0.3V" class="0">
 <segment>
 <pinref part="R19" gate="G$1" pin="1"/>
 <pinref part="R17" gate="G$1" pin="2"/>
@@ -7574,16 +7585,16 @@ part number 2062-2P from STA</description>
 <pinref part="H-BRIDGE-2A" gate="G$1" pin="P$3"/>
 </segment>
 </net>
-<net name="READ_ACT2" class="0">
+<net name="READ_ACT1" class="0">
 <segment>
-<pinref part="ACT-READ2" gate="A" pin="2"/>
+<pinref part="ACT-READ1" gate="A" pin="2"/>
 <wire x1="68.58" y1="238.76" x2="76.2" y2="238.76" width="0.1524" layer="91"/>
 <label x="76.2" y="238.76" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="READ_ACT1" class="0">
+<net name="READ_ACT2" class="0">
 <segment>
-<pinref part="ACT-READ1" gate="A" pin="2"/>
+<pinref part="ACT-READ2" gate="A" pin="2"/>
 <wire x1="68.58" y1="218.44" x2="76.2" y2="218.44" width="0.1524" layer="91"/>
 <label x="76.2" y="218.44" size="1.27" layer="95" xref="yes"/>
 </segment>
@@ -7768,6 +7779,7 @@ part number 2062-2P from STA</description>
 <instance part="VCC1" gate="G$1" x="7.62" y="71.12" rot="R180"/>
 <instance part="PCB2" gate="G$1" x="68.58" y="58.42" rot="R270"/>
 <instance part="GND41" gate="1" x="30.48" y="7.62"/>
+<instance part="P+28" gate="1" x="99.06" y="20.32"/>
 </instances>
 <busses>
 </busses>
@@ -7833,6 +7845,15 @@ part number 2062-2P from STA</description>
 <wire x1="10.16" y1="83.82" x2="38.1" y2="83.82" width="0.1524" layer="91"/>
 <pinref part="PCB2" gate="G$1" pin="5V"/>
 </segment>
+<segment>
+<pinref part="PCB2" gate="G$1" pin="+5V."/>
+<pinref part="P+28" gate="1" pin="+5V"/>
+<wire x1="88.9" y1="10.16" x2="99.06" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="10.16" x2="99.06" y2="17.78" width="0.1524" layer="91"/>
+<pinref part="PCB2" gate="G$1" pin="+5V.."/>
+<wire x1="88.9" y1="10.16" x2="88.9" y2="5.08" width="0.1524" layer="91"/>
+<junction x="88.9" y="10.16"/>
+</segment>
 </net>
 <net name="GND" class="0">
 <segment>
@@ -7857,6 +7878,9 @@ part number 2062-2P from STA</description>
 <pinref part="PCB2" gate="G$1" pin="GND..."/>
 <wire x1="30.48" y1="12.7" x2="45.72" y2="12.7" width="0.1524" layer="91"/>
 <wire x1="45.72" y1="12.7" x2="45.72" y2="10.16" width="0.1524" layer="91"/>
+<pinref part="PCB2" gate="G$1" pin="GND...."/>
+<wire x1="45.72" y1="5.08" x2="45.72" y2="10.16" width="0.1524" layer="91"/>
+<junction x="45.72" y="10.16"/>
 </segment>
 </net>
 <net name="+3V3" class="0">
@@ -7903,13 +7927,6 @@ part number 2062-2P from STA</description>
 <wire x1="38.1" y1="68.58" x2="33.02" y2="68.58" width="0.1524" layer="91"/>
 <label x="33.02" y="68.58" size="1.27" layer="95" rot="MR0" xref="yes"/>
 <pinref part="PCB2" gate="G$1" pin="A0"/>
-</segment>
-</net>
-<net name="READ_ACT2" class="0">
-<segment>
-<wire x1="38.1" y1="66.04" x2="33.02" y2="66.04" width="0.1524" layer="91"/>
-<label x="33.02" y="66.04" size="1.27" layer="95" rot="MR0" xref="yes"/>
-<pinref part="PCB2" gate="G$1" pin="A1"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -8100,14 +8117,6 @@ part number 2062-2P from STA</description>
 <pinref part="PCB2" gate="G$1" pin="38"/>
 </segment>
 </net>
-<net name="LED2G" class="0">
-<segment>
-<wire x1="71.12" y1="5.08" x2="71.12" y2="-15.24" width="0.1524" layer="91"/>
-<wire x1="71.12" y1="-15.24" x2="76.2" y2="-15.24" width="0.1524" layer="91"/>
-<label x="76.2" y="-15.24" size="1.27" layer="95" xref="yes"/>
-<pinref part="PCB2" gate="G$1" pin="35"/>
-</segment>
-</net>
 <net name="LED2B" class="0">
 <segment>
 <wire x1="68.58" y1="5.08" x2="68.58" y2="-17.78" width="0.1524" layer="91"/>
@@ -8118,18 +8127,18 @@ part number 2062-2P from STA</description>
 </net>
 <net name="LED1B" class="0">
 <segment>
-<wire x1="68.58" y1="10.16" x2="68.58" y2="25.4" width="0.1524" layer="91"/>
-<wire x1="68.58" y1="25.4" x2="76.2" y2="25.4" width="0.1524" layer="91"/>
-<label x="76.2" y="25.4" size="1.27" layer="95" xref="yes"/>
-<pinref part="PCB2" gate="G$1" pin="36"/>
+<wire x1="73.66" y1="5.08" x2="73.66" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="-12.7" x2="76.2" y2="-12.7" width="0.1524" layer="91"/>
+<label x="76.2" y="-12.7" size="1.27" layer="95" xref="yes"/>
+<pinref part="PCB2" gate="G$1" pin="33"/>
 </segment>
 </net>
 <net name="LED1G" class="0">
 <segment>
-<wire x1="71.12" y1="10.16" x2="71.12" y2="22.86" width="0.1524" layer="91"/>
-<wire x1="71.12" y1="22.86" x2="76.2" y2="22.86" width="0.1524" layer="91"/>
-<label x="76.2" y="22.86" size="1.27" layer="95" xref="yes"/>
-<pinref part="PCB2" gate="G$1" pin="34"/>
+<wire x1="71.12" y1="5.08" x2="71.12" y2="-15.24" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="-15.24" x2="76.2" y2="-15.24" width="0.1524" layer="91"/>
+<label x="76.2" y="-15.24" size="1.27" layer="95" xref="yes"/>
+<pinref part="PCB2" gate="G$1" pin="35"/>
 </segment>
 </net>
 <net name="LED1R" class="0">
@@ -8140,12 +8149,27 @@ part number 2062-2P from STA</description>
 <pinref part="PCB2" gate="G$1" pin="32"/>
 </segment>
 </net>
+<net name="READ_ACT2" class="0">
+<segment>
+<wire x1="38.1" y1="66.04" x2="33.02" y2="66.04" width="0.1524" layer="91"/>
+<label x="33.02" y="66.04" size="1.27" layer="95" rot="MR0" xref="yes"/>
+<pinref part="PCB2" gate="G$1" pin="A1"/>
+</segment>
+</net>
 <net name="LED2R" class="0">
 <segment>
-<wire x1="73.66" y1="5.08" x2="73.66" y2="-12.7" width="0.1524" layer="91"/>
-<wire x1="73.66" y1="-12.7" x2="76.2" y2="-12.7" width="0.1524" layer="91"/>
-<label x="76.2" y="-12.7" size="1.27" layer="95" xref="yes"/>
-<pinref part="PCB2" gate="G$1" pin="33"/>
+<wire x1="71.12" y1="10.16" x2="71.12" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="22.86" x2="76.2" y2="22.86" width="0.1524" layer="91"/>
+<label x="76.2" y="22.86" size="1.27" layer="95" xref="yes"/>
+<pinref part="PCB2" gate="G$1" pin="34"/>
+</segment>
+</net>
+<net name="LED2G" class="0">
+<segment>
+<wire x1="68.58" y1="10.16" x2="68.58" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="25.4" x2="76.2" y2="25.4" width="0.1524" layer="91"/>
+<label x="76.2" y="25.4" size="1.27" layer="95" xref="yes"/>
+<pinref part="PCB2" gate="G$1" pin="36"/>
 </segment>
 </net>
 </nets>
