@@ -5,8 +5,11 @@
 #ifndef GPSFunctions
 #define GPSFunctions
 
+#define USING_GPS true
+
 #define HELIOS_DEBUG false
 #include "Arduino.h"
+#include <Adafruit_GPS.h>
 
 //boolean usingInterrupt = false; 
 
@@ -33,5 +36,15 @@ struct myGPSData{ //Data structure for storing gps info
 
 #if USING_GPS
 
+class myAGPS{
+  private:
+    void recordGPS(myGPSData *gpsData, Adafruit_GPS *GPS);
+
+  public:
+    int initialize(myGPSData *gpsData, Adafruit_GPS *GPS);
+    void read(myGPSData *gpsData, Adafruit_GPS *GPS);
+};
+
 #endif
+
 #endif

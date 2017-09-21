@@ -7,18 +7,18 @@
 #define USING_GPS true
 #define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well
 #define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
-#define DEBUG_SERIAL Serial
 #define GPS_Serial Serial1
 
 //Import Custom Libraries
-#include "GPSFunctions.cpp"
-#include "HoneywellFunctions.cpp"
-#include "LEDFunctions.cpp"
-#include "MotorFunctions.cpp"
-#include "XbeeFunctions.cpp"
-#include "ActuatorFunctions.cpp"
-#include "LogFunctions.cpp"
-//#include "BMEFunctions.cpp"
+#include "myPins.h"
+#include "myGPS.h"
+#include "mySSC.h"
+#include "myLED.h"
+#include "myMotor.h"
+#include "myXbee.h"
+#include "myAct.h"
+#include "myLog.h"
+//#include "myBME.h"
 
 #include<Wire.h>
 
@@ -26,7 +26,6 @@
 const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed";
 
 //Control Parameters
-//#define VALVE_MOVE_TIME 9000 //milliseconds
 int32_t altitudeToOpen = 18000; //meters
 int32_t timeOpen = 60000; //milliseconds
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
@@ -51,8 +50,8 @@ unsigned long oldTime = 0;
 uint8_t logsCounter = 0;
 
 //Data structures
-MY_HONEYWELL honeywellData[2];
-MY_GPS gpsData;
+myHoneywellData honeywellData[2];
+myGPSData gpsData;
 
 //For log timing
 uint32_t log_timer = 0;
@@ -61,16 +60,16 @@ uint32_t log_timer = 0;
 uint32_t command_timer= 0;
 
 //Create objects
-ALED led;
-XBEE xbee;
-Actuator actuator;
-Datalog datalog;
-Honeywell honeywell;
-Motor motor;
+myLED led(LED1_PIN1, LED1_PIN2, LED1_PIN3);
+myXbee xbee;
+myActuator actuator;
+myDatalog datalog;
+myHoneywell honeywell;
+myMotor motor;
 #if (USING_GPS)
   //Required for GPS to work
   Adafruit_GPS GPS(&GPS_Serial);
-  AGPS gps;
+  myAGPS gps;
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,22 +80,22 @@ void setup(){
   delay(5000);
   Serial.begin(115200);/*
   led.initialize();
-  if(!actuator.initialize()) DEBUG_SERIAL.println("Valve error");
-  if(!motor.initialize()) DEBUG_SERIAL.println("Fan error");
-  if(!xbee.initialize()) DEBUG_SERIAL.println("XBEE Error");
-  if(!datalog.initialize()) DEBUG_SERIAL.println("Log error");
-  if(!gps.initialize(&gpsData, &GPS)) DEBUG_SERIAL.println("GPS Error");*/
-  if(!honeywell.initialize(&honeywellData[0], &honeywellData[1])) DEBUG_SERIAL.println("Honeywell Error");
+  if(!actuator.initialize()) Serial.println("Valve error");
+  if(!motor.initialize()) Serial.println("Fan error");
+  if(!xbee.initialize()) Serial.println("XBEE Error");
+  if(!datalog.initialize()) Serial.println("Log error");
+  if(!gps.initialize(&gpsData, &GPS)) Serial.println("GPS Error");*/
+  if(!honeywell.initialize(&honeywellData[0], &honeywellData[1])) Serial.println("Honeywell Error");
   delay(1000);
 }
 
 void loop(){
-  honeywell.read(&honeywellData[honeywell.INSIDE_SENSOR], honeywell.INSIDE_SENSOR);
+  honeywell.read(&honeywellData[honeywell.TCA_INSIDE_SENSOR], honeywell.TCA_INSIDE_SENSOR);
   Serial.print("Inside: ");
-  Serial.println(honeywellData[honeywell.INSIDE_SENSOR].pressure, DEC);
-  honeywell.read(&honeywellData[honeywell.OUTSIDE_SENSOR], honeywell.OUTSIDE_SENSOR);
+  Serial.println(honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure, DEC);
+  honeywell.read(&honeywellData[honeywell.TCA_OUTSIDE_SENSOR], honeywell.TCA_OUTSIDE_SENSOR);
   Serial.print("Outside: ");
-  Serial.println(honeywellData[honeywell.OUTSIDE_SENSOR].pressure, DEC);
+  Serial.println(honeywellData[honeywell.TCA_OUTSIDE_SENSOR].pressure, DEC);
   /*
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){
     xbeeCommand();
@@ -258,14 +257,14 @@ void xbeeCommand(){
     xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, altitudeToOpen);
   }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){
     xbee.sendData(gpsData.altitude, ascentVelocity);
-    if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee data sent");
+    if(HELIOS_DEBUG) Serial.println("xbee data sent");
   }
   else if (xbee.getLastCommand() == xbee.COMMAND_ABORT){
     valveAlreadyClosed = 1;
     motor.stopFan();
     valveIsOpen = actuator.closeValve();
     xbee.sendConf(xbee.CONFIRM_CODE_ABORT, 0);
-    if(HELIOS_DEBUG) DEBUG_SERIAL.println("xbee has commanded abort");
+    if(HELIOS_DEBUG) Serial.println("xbee has commanded abort");
   }else if (xbee.getLastCommand() == xbee.COMMAND_VENT_NOW){
     valveAlreadyClosed = 0;
     valveIsOpen = actuator.openValve();
@@ -274,7 +273,7 @@ void xbeeCommand(){
     valveTimeAtOpen = millis();
     valveHasOpened = 1;
     xbee.sendConf(xbee.CONFIRM_CODE_VENT, timeOpen);
-    if (HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
+    if (HELIOS_DEBUG) Serial.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
   }else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){
     timeOpen = xbee.getCommandedTime();
     xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, timeOpen);
@@ -289,7 +288,7 @@ void xbeeCommand(){
     valveTimeAtOpen = millis();
     valveHasOpened = 1;
     xbee.sendConf(xbee.CONFIRM_CODE_REVERSE, timeOpen);
-    if(HELIOS_DEBUG) DEBUG_SERIAL.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
+    if(HELIOS_DEBUG) Serial.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){
     actuator.openValve();
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_OPEN);
@@ -301,7 +300,7 @@ void xbeeCommand(){
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_FWD);
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
     motor.reverseFan();
-    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV)
+    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV);
   }else if (xbee.getLastCommand() == xbee.COMMAND_KILL){
     // make a kill switch in the LVC maybe
     xbee.sendConf(xbee.CONFIRM_CODE_KILL, 0);
@@ -310,8 +309,8 @@ void xbeeCommand(){
 }
 
 void logData(){
-  honeywell.read(&honeywellData[honeywell.INSIDE_SENSOR], honeywell.INSIDE_SENSOR);
-  honeywell.read(&honeywellData[honeywell.OUTSIDE_SENSOR], honeywell.OUTSIDE_SENSOR);
+  honeywell.read(&honeywellData[honeywell.TCA_INSIDE_SENSOR], honeywell.TCA_INSIDE_SENSOR);
+  honeywell.read(&honeywellData[honeywell.TCA_OUTSIDE_SENSOR], honeywell.TCA_OUTSIDE_SENSOR);
   /*getBME(2);
   getBME(3);
   getBME(4);*/
@@ -349,17 +348,17 @@ void logData(){
   dataString += (String)gpsData.altitude + ",";
   dataString += (String)gpsData.satellites + ",";
   
-  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].pressure + ",";
-  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].temperature + ",";
-  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].status + ",";
-  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].rawPressure + ",";
-  dataString += (String)honeywellData[honeywell.INSIDE_SENSOR].rawTemperature + ",";
+  dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure + ",";
+  dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].temperature + ",";
+  dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].status + ",";
+  dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].rawPressure + ",";
+  dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].rawTemperature + ",";
 
-  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].pressure + ",";
-  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].temperature + ",";
-  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].status + ",";
-  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].rawPressure + ",";
-  dataString += (String)honeywellData[honeywell.OUTSIDE_SENSOR].rawTemperature + ",";
+  dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].pressure + ",";
+  dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].temperature + ",";
+  dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].status + ",";
+  dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].rawPressure + ",";
+  dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].rawTemperature + ",";
   
   /*dataString += (String)bmeData[0].pressure + ",";
   dataString += (String)bmeData[0].temperature + ",";
