@@ -8,6 +8,7 @@
 #define USING_GPS true
 
 #define HELIOS_DEBUG false
+#define GPS_Serial Serial1
 #include "Arduino.h"
 #include <Adafruit_GPS.h>
 
@@ -38,11 +39,11 @@ struct myGPSData{ //Data structure for storing gps info
 
 class myAGPS{
   private:
-    void recordGPS(myGPSData *gpsData, Adafruit_GPS *GPS);
+    void recordGPS(myGPSData *gpsData);
 
   public:
-    int initialize(myGPSData *gpsData, Adafruit_GPS *GPS);
-    void read(myGPSData *gpsData, Adafruit_GPS *GPS);
+    int initialize(myGPSData *gpsData);
+    void read(myGPSData *gpsData);
 };
 
 #endif

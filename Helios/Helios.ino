@@ -68,7 +68,7 @@ myHoneywell honeywell;
 myMotor motor;
 #if (USING_GPS)
   //Required for GPS to work
-  Adafruit_GPS GPS(&GPS_Serial);
+  //Adafruit_GPS GPS(&GPS_Serial);
   myAGPS gps;
 #endif
 
@@ -171,12 +171,12 @@ void setup() {
     led.setStatus(led.RED);
 
   #if (USING_GPS)
-    if(!gps.initialize(&gpsData, &GPS))
+    if(!gps.initialize(&gpsData))
       led.setStatus(led.RED);
 
     //wait for the gps to get a fix before starting up
     //while(!gpsData.fix)
-      gps.read(&gpsData, &GPS);
+      gps.read(&gpsData);
   #else
     gpsData = {};
   #endif
@@ -201,7 +201,7 @@ void loop() {
   }*/
   
   #if (USING_GPS)
-    gps.read(&gpsData, &GPS);
+    gps.read(&gpsData);
   #endif
 
   if (gpsData.fix)
