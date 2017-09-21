@@ -1,13 +1,10 @@
-/*Now using in house custom Balloonduino board*/
-
-//confirmed that SD card writer works correctly
-//confirmed that gps works correctly
-//confirmed that xbee works correctly
-
+/*
+ * Code currently intended for Mega with custom shield
+ * Should also work on Balloonduino with a few pin number changes
+ */
 #define USING_GPS true
 #define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well
 #define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
-#define GPS_Serial Serial1
 
 //Import Custom Libraries
 #include "myPins.h"
@@ -23,7 +20,7 @@
 #include<Wire.h>
 
 //First line printed identifies order of data
-const String HEADER_STRING = "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed";
+#define HEADER_STRING "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed"
 
 //Control Parameters
 int32_t altitudeToOpen = 18000; //meters
@@ -40,8 +37,6 @@ uint8_t valveAltitudeCheckCounter=0;
 boolean valveHasOpened=0;
 boolean valveAlreadyClosed=0;
 boolean valveIsOpen; //true for open, false for closed
-
-//uint16_t loopNum = 0;
 
 //For ascent velocity calculation
 float ascentVelocity = 0.0;
@@ -66,10 +61,8 @@ myActuator actuator;
 myDatalog datalog;
 myHoneywell honeywell;
 myMotor motor;
-#if (USING_GPS)
-  //Required for GPS to work
-  //Adafruit_GPS GPS(&GPS_Serial);
-  myAGPS gps;
+#if (USING_GPS) //The GPS is often troublesome, so we nest this inside an if statement so it can be readily removed for other testing
+  myGPS gps;
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

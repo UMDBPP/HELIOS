@@ -37,11 +37,13 @@ struct myGPSData{ //Data structure for storing gps info
 
 #if USING_GPS
 
-class myAGPS{
+class myGPS{
   private:
+    Adafruit_GPS GPS;
     void recordGPS(myGPSData *gpsData);
 
   public:
+    myGPS(); 
     int initialize(myGPSData *gpsData);
     void read(myGPSData *gpsData);
 };

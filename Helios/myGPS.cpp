@@ -1,4 +1,3 @@
-//#include <Adafruit_Sensor.h>
 #include <Adafruit_GPS.h> //include gps library
 #include <Arduino.h>  //include arduino library to recognize keywords
 #include "myGPS.h"
@@ -6,9 +5,9 @@
 #if USING_GPS
 #define GPSECHO false
 
-Adafruit_GPS GPS(&GPS_Serial);
+myGPS::myGPS():GPS(&GPS_Serial){} //this line used to be "Adafruit_GPS GPS(&GPS_Serial);", but is now a class variable
 
-void myAGPS::recordGPS(myGPSData *gpsData){  //save current data to the structure indicated by the pointer passed
+void myGPS::recordGPS(myGPSData *gpsData){  //save current data to the structure indicated by the pointer passed
   gpsData->hour = GPS.hour;//this whole sequence could be more efficient if we were memory limited, but as is, this helps keep data organized and isolated
   gpsData->minute = GPS.minute;
   gpsData->second = GPS.seconds;
@@ -31,7 +30,7 @@ void myAGPS::recordGPS(myGPSData *gpsData){  //save current data to the structur
   }
 }
 
-int myAGPS::initialize(myGPSData *gpsData){  //initialize the gps
+int myGPS::initialize(myGPSData *gpsData){  //initialize the gps
   GPS.begin(9600);
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
@@ -44,7 +43,7 @@ int myAGPS::initialize(myGPSData *gpsData){  //initialize the gps
   return 1; //return successful
 }
 
-void myAGPS::read(myGPSData *gpsData){ //function to read data and save it to the pointer passed
+void myGPS::read(myGPSData *gpsData){ //function to read data and save it to the pointer passed
   char c = GPS.read();  //read the gps
   if (GPSECHO)  //echo the raw data if true
     if (c) Serial.println(c);
