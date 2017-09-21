@@ -56,7 +56,7 @@ COMMAND HELIOS VALVE_OPEN BIG_ENDIAN "Helios Valve Open No Fan"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 12} %>
 
-COMMAND HELIOS VALVE_CLOSE BIG_ENDIAN "Helios Valve Close"
+COMMAND HELIOS VALVE_CLOSE BIG_ENDIAN "Helios Valve Close No Fan"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 13} %>
 
