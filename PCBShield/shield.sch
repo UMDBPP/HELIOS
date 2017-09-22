@@ -378,12 +378,12 @@ http://www.st.com&lt;p&gt;
 <library name="adafruit">
 <packages>
 <package name="XBEE">
-<wire x1="-12.5" y1="-14" x2="12.5" y2="-14" width="0.127" layer="21"/>
-<wire x1="12.5" y1="-14" x2="12.5" y2="7" width="0.127" layer="21"/>
+<wire x1="-12.5" y1="-19.558" x2="12.5" y2="-19.558" width="0.127" layer="21"/>
+<wire x1="12.5" y1="-19.558" x2="12.5" y2="7" width="0.127" layer="21"/>
 <wire x1="12.5" y1="7" x2="4.5" y2="13.5" width="0.127" layer="21"/>
 <wire x1="4.5" y1="13.5" x2="-5" y2="13.5" width="0.127" layer="21"/>
 <wire x1="-5" y1="13.5" x2="-12.5" y2="7" width="0.127" layer="21"/>
-<wire x1="-12.5" y1="7" x2="-12.5" y2="-14" width="0.127" layer="21"/>
+<wire x1="-12.5" y1="7" x2="-12.5" y2="-19.558" width="0.127" layer="21"/>
 <pad name="10" x="-11" y="-12.5" drill="0.7" diameter="1.4224"/>
 <pad name="9" x="-11" y="-10.5" drill="0.7" diameter="1.4224"/>
 <pad name="8" x="-11" y="-8.5" drill="0.7" diameter="1.4224"/>
@@ -404,7 +404,7 @@ http://www.st.com&lt;p&gt;
 <pad name="18" x="11" y="1.5" drill="0.7" diameter="1.4224"/>
 <pad name="19" x="11" y="3.5" drill="0.7" diameter="1.4224"/>
 <pad name="20" x="11" y="5.5" drill="0.7" diameter="1.4224"/>
-<text x="-3" y="-16" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3" y="-18.54" size="1.27" layer="25">&gt;NAME</text>
 </package>
 <package name="R0402">
 <description>&lt;b&gt;RESISTOR&lt;/b&gt;&lt;p&gt;

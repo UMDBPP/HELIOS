@@ -1299,12 +1299,12 @@ http://www.st.com&lt;p&gt;
 <rectangle x1="0.4254" y1="-0.7" x2="1.6254" y2="0.7" layer="31"/>
 </package>
 <package name="XBEE">
-<wire x1="-12.5" y1="-14" x2="12.5" y2="-14" width="0.127" layer="21"/>
-<wire x1="12.5" y1="-14" x2="12.5" y2="7" width="0.127" layer="21"/>
+<wire x1="-12.5" y1="-19.558" x2="12.5" y2="-19.558" width="0.127" layer="21"/>
+<wire x1="12.5" y1="-19.558" x2="12.5" y2="7" width="0.127" layer="21"/>
 <wire x1="12.5" y1="7" x2="4.5" y2="13.5" width="0.127" layer="21"/>
 <wire x1="4.5" y1="13.5" x2="-5" y2="13.5" width="0.127" layer="21"/>
 <wire x1="-5" y1="13.5" x2="-12.5" y2="7" width="0.127" layer="21"/>
-<wire x1="-12.5" y1="7" x2="-12.5" y2="-14" width="0.127" layer="21"/>
+<wire x1="-12.5" y1="7" x2="-12.5" y2="-19.558" width="0.127" layer="21"/>
 <pad name="10" x="-11" y="-12.5" drill="0.7" diameter="1.4224"/>
 <pad name="9" x="-11" y="-10.5" drill="0.7" diameter="1.4224"/>
 <pad name="8" x="-11" y="-8.5" drill="0.7" diameter="1.4224"/>
@@ -1325,7 +1325,7 @@ http://www.st.com&lt;p&gt;
 <pad name="18" x="11" y="1.5" drill="0.7" diameter="1.4224"/>
 <pad name="19" x="11" y="3.5" drill="0.7" diameter="1.4224"/>
 <pad name="20" x="11" y="5.5" drill="0.7" diameter="1.4224"/>
-<text x="-3" y="-16" size="1.27" layer="25">&gt;NAME</text>
+<text x="-3" y="-18.54" size="1.27" layer="25">&gt;NAME</text>
 </package>
 </packages>
 </library>
@@ -1569,7 +1569,7 @@ design rules under a new name.</description>
 </autorouter>
 <elements>
 <element name="3.3V-REGULATOR" library="specialparts" package="REGULATOR" value="LD1117" x="61.468" y="35.052" smashed="yes" rot="R270">
-<attribute name="NAME" x="62.738" y="40.386" size="1.27" layer="25" rot="R270"/>
+<attribute name="NAME" x="62.865" y="41.91" size="1.27" layer="25" rot="R270"/>
 </element>
 <element name="BRIDGE1-2" library="st-microelectronics" library_urn="urn:adsk.eagle:library:368" package="DIL16" package3d_urn="urn:adsk.eagle:package:26820/1" value="L293D" x="71.12" y="41.402" smashed="yes" rot="R90">
 <attribute name="MF" value="" x="71.12" y="41.402" size="1.778" layer="27" rot="R90" display="off"/>
@@ -1584,7 +1584,9 @@ design rules under a new name.</description>
 <attribute name="NAME" x="61.849" y="40.894" size="1.27" layer="25" ratio="10" rot="R180"/>
 </element>
 <element name="CUTOFF" library="specialparts" package="MOSFET" value="FQP27P06" x="55.88" y="24.13"/>
-<element name="GPS" library="specialparts" package="GPS" value="ULTIMATE-GPS" x="48.26" y="28.956" rot="R90"/>
+<element name="GPS" library="specialparts" package="GPS" value="ULTIMATE-GPS" x="48.26" y="28.956" smashed="yes" rot="R90">
+<attribute name="NAME" x="49.149" y="38.1" size="1.27" layer="25" rot="R90"/>
+</element>
 <element name="I2C_5V_2" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X04" package3d_urn="urn:adsk.eagle:package:22407/2" value="" x="153.162" y="61.722" smashed="yes" rot="R90">
 <attribute name="NAME" x="151.3332" y="56.5658" size="1.27" layer="25" ratio="10" rot="R90"/>
 <attribute name="VALUE" x="156.337" y="56.642" size="1.27" layer="27" rot="R90"/>
@@ -1610,7 +1612,7 @@ design rules under a new name.</description>
 <attribute name="VALUE" x="142.621" y="70.358" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="BRIDGE1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X02" package3d_urn="urn:adsk.eagle:package:22435/2" value="" x="74.168" y="54.356" smashed="yes">
-<attribute name="NAME" x="72.0598" y="55.9308" size="1.27" layer="25" ratio="10"/>
+<attribute name="NAME" x="70.1548" y="51.7398" size="1.27" layer="25" ratio="10"/>
 <attribute name="VALUE" x="71.628" y="51.181" size="1.27" layer="27"/>
 </element>
 <element name="BRIDGE2" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X02" package3d_urn="urn:adsk.eagle:package:22435/2" value="" x="66.802" y="54.356" smashed="yes">
@@ -1619,7 +1621,10 @@ design rules under a new name.</description>
 </element>
 <element name="LED1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X04" package3d_urn="urn:adsk.eagle:package:22407/2" value="" x="109.728" y="64.77" rot="R90"/>
 <element name="BRIDGE3" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X02" package3d_urn="urn:adsk.eagle:package:22435/2" value="" x="86.36" y="65.278" rot="R90"/>
-<element name="ACT-READ2" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X03" package3d_urn="urn:adsk.eagle:package:22458/2" value="" x="78.74" y="59.436"/>
+<element name="ACT-READ2" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X03" package3d_urn="urn:adsk.eagle:package:22458/2" value="" x="78.74" y="60.706" smashed="yes">
+<attribute name="NAME" x="73.8378" y="62.5348" size="1.27" layer="25" ratio="10"/>
+<attribute name="VALUE" x="74.93" y="57.531" size="1.27" layer="27"/>
+</element>
 <element name="ACT-READ1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X03" package3d_urn="urn:adsk.eagle:package:22458/2" value="" x="68.326" y="59.436"/>
 <element name="SWITCH1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X02" package3d_urn="urn:adsk.eagle:package:22435/2" value="" x="113.284" y="55.88" smashed="yes">
 <attribute name="NAME" x="108.6358" y="57.4548" size="1.27" layer="25" ratio="10"/>
@@ -1665,7 +1670,7 @@ design rules under a new name.</description>
 <element name="R1" library="adafruit" package="0805-THM" value="4.7k" x="145.796" y="24.638" smashed="yes" rot="R180"/>
 <element name="R10" library="adafruit" package="0805-THM" value="4.7k" x="150.622" y="21.971" smashed="yes" rot="R180"/>
 <element name="R11" library="adafruit" package="0805-THM" value="4.7k" x="146.05" y="68.58" smashed="yes" rot="R180">
-<attribute name="VALUE" x="153.7526" y="67.545" size="1.27" layer="27" ratio="10" rot="R180"/>
+<attribute name="VALUE" x="155.7846" y="69.069" size="1.27" layer="27" ratio="10" rot="R180"/>
 </element>
 <element name="R12" library="adafruit" package="0805-THM" value="4.7k" x="146.177" y="82.169" smashed="yes" rot="R180">
 <attribute name="VALUE" x="156.0386" y="82.912" size="1.27" layer="27" ratio="10" rot="R180"/>
@@ -1703,7 +1708,9 @@ design rules under a new name.</description>
 <element name="R7" library="adafruit" package="0805-THM" value="4.7k" x="145.796" y="37.338" smashed="yes" rot="R180"/>
 <element name="R8" library="adafruit" package="0805-THM" value="4.7k" x="145.796" y="42.418" smashed="yes" rot="R180"/>
 <element name="R9" library="adafruit" package="0805-THM" value="4.7k" x="138.557" y="21.971" smashed="yes"/>
-<element name="SD-WRITER" library="specialparts" package="DEV13743" value="DEV13473" x="48.26" y="53.594" rot="R90"/>
+<element name="SD-WRITER" library="specialparts" package="DEV13743" value="DEV13473" x="48.26" y="53.594" smashed="yes" rot="R90">
+<attribute name="NAME" x="48.895" y="56.388" size="1.27" layer="25" rot="R90"/>
+</element>
 <element name="SWITCH1-FET" library="specialparts" package="MOSFET" value="FQP85N06" x="113.284" y="46.736" smashed="yes"/>
 <element name="SWITCH2-FET" library="specialparts" package="MOSFET" value="FQP27P06" x="120.396" y="45.974" smashed="yes"/>
 <element name="XBEE" library="adafruit" package="XBEE" value="XBEE" x="90.17" y="39.243" smashed="yes" rot="R180">
@@ -1780,8 +1787,6 @@ design rules under a new name.</description>
 <wire x1="76.708" y1="78.232" x2="75.438" y2="79.502" width="0.254" layer="1"/>
 <wire x1="71.12" y1="78.232" x2="72.39" y2="79.502" width="0.254" layer="1"/>
 <wire x1="65.786" y1="59.436" x2="67.818" y2="61.468" width="0.254" layer="1"/>
-<wire x1="67.818" y1="61.468" x2="74.168" y2="61.468" width="0.254" layer="1"/>
-<wire x1="74.168" y1="61.468" x2="76.2" y2="59.436" width="0.254" layer="1"/>
 <wire x1="63.2446" y1="63.07195" x2="63.2446" y2="63.92805" width="0.254" layer="1"/>
 <wire x1="65.786" y1="59.436" x2="65.786" y2="60.53055" width="0.254" layer="1"/>
 <wire x1="65.786" y1="60.53055" x2="63.2446" y2="63.07195" width="0.254" layer="1"/>
@@ -1830,6 +1835,8 @@ design rules under a new name.</description>
 <wire x1="111.7092" y1="71.8849875" x2="111.7092" y2="75.3872" width="0.254" layer="16"/>
 <wire x1="106.807" y1="69.342" x2="108.6358" y2="71.1708" width="0.254" layer="16"/>
 <wire x1="108.6358" y1="71.1708" x2="110.9950125" y2="71.1708" width="0.254" layer="16"/>
+<wire x1="75.438" y1="61.468" x2="76.2" y2="60.706" width="0.254" layer="1"/>
+<wire x1="67.818" y1="61.468" x2="75.438" y2="61.468" width="0.254" layer="1"/>
 <wire x1="116.332" y1="42.418" x2="135.89" y2="45.7712375" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="VCC">
@@ -1901,13 +1908,18 @@ design rules under a new name.</description>
 <wire x1="51.816" y1="42.418" x2="54.356" y2="42.418" width="0.254" layer="1"/>
 <wire x1="46.7842" y1="75.819" x2="45.0626" y2="75.819" width="0.254" layer="16"/>
 <wire x1="101.3206" y1="61.47553125" x2="100.59153125" y2="62.2046" width="0.508" layer="16"/>
-<wire x1="78.3064" y1="53.85693125" x2="78.3064" y2="53.6684" width="0.508" layer="16"/>
+<wire x1="78.3064" y1="53.6684" x2="78.3064" y2="53.85693125" width="0.508" layer="16"/>
 <wire x1="78.3064" y1="53.6684" x2="74.93" y2="50.292" width="0.508" layer="16"/>
 <wire x1="112.014" y1="55.88" x2="105.65879375" y2="55.88" width="0.508" layer="16"/>
 <wire x1="101.3206" y1="60.21819375" x2="101.3206" y2="61.47553125" width="0.508" layer="16"/>
 <wire x1="105.65879375" y1="55.88" x2="101.3206" y2="60.21819375" width="0.508" layer="16"/>
-<wire x1="100.59153125" y1="62.2046" x2="86.65406875" y2="62.2046" width="0.508" layer="16"/>
-<wire x1="86.65406875" y1="62.2046" x2="78.3064" y2="53.85693125" width="0.508" layer="16"/>
+<wire x1="86.65406875" y1="62.2046" x2="100.59153125" y2="62.2046" width="0.508" layer="16"/>
+<wire x1="78.3064" y1="53.85693125" x2="80.65393125" y2="53.85693125" width="0.508" layer="16"/>
+<wire x1="80.65393125" y1="53.85693125" x2="81.915" y2="55.118" width="0.508" layer="16"/>
+<wire x1="81.915" y1="55.118" x2="81.915" y2="57.785" width="0.508" layer="16"/>
+<wire x1="81.915" y1="57.785" x2="83.693" y2="59.563" width="0.508" layer="16"/>
+<wire x1="83.693" y1="59.563" x2="84.01246875" y2="59.563" width="0.508" layer="16"/>
+<wire x1="84.01246875" y1="59.563" x2="86.65406875" y2="62.2046" width="0.508" layer="16"/>
 </signal>
 <signal name="GND">
 <contactref element="BRIDGE1-2" pad="12"/>
@@ -1979,28 +1991,21 @@ design rules under a new name.</description>
 <wire x1="62.103" y1="35.687" x2="61.468" y2="35.052" width="0.254" layer="1"/>
 <via x="74.93" y="29.083" extent="1-16" drill="0.35"/>
 <wire x1="74.93" y1="24.13" x2="74.93" y2="29.083" width="0.254" layer="1"/>
-<wire x1="80.518" y1="63.5" x2="81.61605" y2="63.5" width="0.508" layer="1"/>
-<wire x1="87.7824" y1="65.1764" x2="88.011" y2="65.405" width="0.508" layer="1"/>
-<wire x1="81.61605" y1="63.5" x2="83.29245" y2="65.1764" width="0.508" layer="1"/>
-<wire x1="83.29245" y1="65.1764" x2="87.7824" y2="65.1764" width="0.508" layer="1"/>
-<wire x1="88.011" y1="65.405" x2="88.265" y2="65.405" width="0.508" layer="1"/>
-<via x="88.265" y="65.405" extent="1-16" drill="0.35"/>
 </signal>
 <signal name="BRIDGE1_PWM">
 <contactref element="BRIDGE1-2" pad="1"/>
 <contactref element="PCB2" pad="2"/>
-<wire x1="80.2386" y1="60.6293625" x2="80.8486375" y2="61.2394" width="0.254" layer="1"/>
 <wire x1="89.0524" y1="68.78893125" x2="89.70706875" y2="69.4436" width="0.254" layer="1"/>
 <wire x1="89.70706875" y1="69.4436" x2="89.7636" y2="69.4436" width="0.254" layer="1"/>
 <wire x1="89.7636" y1="69.4436" x2="92.71" y2="72.39" width="0.254" layer="1"/>
 <wire x1="74.93" y1="32.512" x2="74.93" y2="33.06251875" width="0.254" layer="1"/>
 <wire x1="74.93" y1="33.06251875" x2="76.5302" y2="34.66271875" width="0.254" layer="1"/>
-<wire x1="76.5302" y1="54.9914375" x2="80.2386" y2="58.6998375" width="0.254" layer="1"/>
-<wire x1="80.2386" y1="58.6998375" x2="80.2386" y2="60.6293625" width="0.254" layer="1"/>
-<wire x1="80.8486375" y1="61.2394" x2="85.8261625" y2="61.2394" width="0.254" layer="1"/>
 <wire x1="76.5302" y1="34.66271875" x2="76.5302" y2="54.9914375" width="0.254" layer="1"/>
-<wire x1="85.8261625" y1="61.2394" x2="89.0524" y2="64.4656375" width="0.254" layer="1"/>
 <wire x1="89.0524" y1="64.4656375" x2="89.0524" y2="68.78893125" width="0.254" layer="1"/>
+<wire x1="79.4836125" y1="57.2996" x2="81.8863625" y2="57.2996" width="0.254" layer="1"/>
+<wire x1="76.5302" y1="54.9914375" x2="77.17545" y2="54.9914375" width="0.254" layer="1"/>
+<wire x1="77.17545" y1="54.9914375" x2="79.4836125" y2="57.2996" width="0.254" layer="1"/>
+<wire x1="81.8863625" y1="57.2996" x2="89.0524" y2="64.4656375" width="0.254" layer="1"/>
 </signal>
 <signal name="BRIDGE1A_IN">
 <contactref element="BRIDGE1-2" pad="2"/>
@@ -2066,21 +2071,23 @@ design rules under a new name.</description>
 <via x="70.358" y="56.515" extent="1-16" drill="0.35"/>
 <wire x1="70.358" y1="56.515" x2="71.374" y2="56.515" width="0.254" layer="1"/>
 <via x="73.914" y="59.055" extent="1-16" drill="0.35"/>
-<wire x1="75.7686375" y1="57.6326" x2="76.6313625" y2="57.6326" width="0.254" layer="16"/>
 <wire x1="87.6483875" y1="69.3194" x2="88.0336" y2="69.7046125" width="0.254" layer="16"/>
-<wire x1="73.914" y1="59.055" x2="74.3462375" y2="59.055" width="0.254" layer="16"/>
 <wire x1="88.0336" y1="70.2536" x2="90.17" y2="72.39" width="0.254" layer="16"/>
-<wire x1="74.3462375" y1="59.055" x2="75.7686375" y2="57.6326" width="0.254" layer="16"/>
 <wire x1="88.0336" y1="69.7046125" x2="88.0336" y2="70.2536" width="0.254" layer="16"/>
-<wire x1="76.6313625" y1="57.6326" x2="77.6986" y2="58.6998375" width="0.254" layer="16"/>
-<wire x1="77.6986" y1="58.6998375" x2="77.6986" y2="60.6293625" width="0.254" layer="16"/>
-<wire x1="77.6986" y1="60.6293625" x2="79.5358375" y2="62.4666" width="0.254" layer="16"/>
-<wire x1="79.5358375" y1="62.4666" x2="80.94605" y2="62.4666" width="0.254" layer="16"/>
-<wire x1="80.94605" y1="62.4666" x2="84.5566" y2="66.07715" width="0.254" layer="16"/>
+<wire x1="84.5566" y1="66.07715" x2="80.94605" y2="62.4666" width="0.254" layer="16"/>
 <wire x1="84.5566" y1="66.07715" x2="84.5566" y2="66.9793625" width="0.254" layer="16"/>
 <wire x1="84.5566" y1="66.9793625" x2="86.8966375" y2="69.3194" width="0.254" layer="16"/>
 <wire x1="86.8966375" y1="69.3194" x2="87.6483875" y2="69.3194" width="0.254" layer="16"/>
 <wire x1="71.374" y1="56.515" x2="73.914" y2="59.055" width="0.254" layer="1"/>
+<wire x1="79.2141625" y1="62.4666" x2="79.1713625" y2="62.5094" width="0.254" layer="16"/>
+<wire x1="79.1713625" y1="62.5094" x2="78.3086375" y2="62.5094" width="0.254" layer="16"/>
+<wire x1="77.2414" y1="59.5126375" x2="76.6313625" y2="58.9026" width="0.254" layer="16"/>
+<wire x1="76.6313625" y1="58.9026" x2="75.7686375" y2="58.9026" width="0.254" layer="16"/>
+<wire x1="75.7686375" y1="58.9026" x2="75.6162375" y2="59.055" width="0.254" layer="16"/>
+<wire x1="77.2414" y1="61.4421625" x2="77.2414" y2="59.5126375" width="0.254" layer="16"/>
+<wire x1="78.3086375" y1="62.5094" x2="77.2414" y2="61.4421625" width="0.254" layer="16"/>
+<wire x1="80.94605" y1="62.4666" x2="79.2141625" y2="62.4666" width="0.254" layer="16"/>
+<wire x1="75.6162375" y1="59.055" x2="73.914" y2="59.055" width="0.254" layer="16"/>
 </signal>
 <signal name="BRIDGE2B_IN">
 <contactref element="BRIDGE1-2" pad="10"/>
@@ -2894,18 +2901,19 @@ design rules under a new name.</description>
 <contactref element="BRIDGE3" pad="1"/>
 <contactref element="H-BRIDGE-2A" pad="P$7"/>
 <wire x1="68.338" y1="63.5" x2="68.338" y2="63.512" width="0.508" layer="1"/>
-<wire x1="69.596" y1="64.77" x2="73.152" y2="64.77" width="0.508" layer="1"/>
-<wire x1="75.692" y1="62.23" x2="81.28" y2="62.23" width="0.508" layer="1"/>
 <wire x1="83.058" y1="64.008" x2="86.36" y2="64.008" width="0.508" layer="1"/>
 <wire x1="68.338" y1="63.512" x2="69.596" y2="64.77" width="0.508" layer="1"/>
-<wire x1="73.152" y1="64.77" x2="75.692" y2="62.23" width="0.508" layer="1"/>
-<wire x1="81.28" y1="62.23" x2="83.058" y2="64.008" width="0.508" layer="1"/>
+<wire x1="82.296" y1="64.77" x2="83.058" y2="64.008" width="0.508" layer="1"/>
+<wire x1="69.596" y1="64.77" x2="82.296" y2="64.77" width="0.508" layer="1"/>
 </signal>
 <signal name="BRIDGE3A_OUT">
 <contactref element="BRIDGE3" pad="2"/>
 <contactref element="H-BRIDGE-2A" pad="P$3"/>
-<wire x1="86.36" y1="66.548" x2="79.506" y2="66.548" width="0.508" layer="1"/>
-<wire x1="79.506" y1="66.548" x2="76.458" y2="63.5" width="0.508" layer="1"/>
+<wire x1="79.502" y1="66.548" x2="78.867" y2="65.913" width="0.508" layer="1"/>
+<via x="78.867" y="65.913" extent="1-16" drill="0.35"/>
+<wire x1="78.867" y1="65.913" x2="78.867" y2="65.909" width="0.508" layer="16"/>
+<wire x1="78.867" y1="65.909" x2="76.458" y2="63.5" width="0.508" layer="16"/>
+<wire x1="86.36" y1="66.548" x2="79.502" y2="66.548" width="0.508" layer="1"/>
 </signal>
 <signal name="READ_ACT1">
 <contactref element="ACT-READ1" pad="2"/>
@@ -2924,12 +2932,13 @@ design rules under a new name.</description>
 <wire x1="72.2470625" y1="56.5658" x2="70.9676" y2="55.2863375" width="0.254" layer="1"/>
 <wire x1="70.9676" y1="55.2863375" x2="70.9676" y2="51.6476625" width="0.254" layer="1"/>
 <wire x1="70.9676" y1="51.6476625" x2="72.136" y2="50.4792625" width="0.254" layer="1"/>
-<wire x1="78.74" y1="59.436" x2="75.8698" y2="56.5658" width="0.254" layer="1"/>
-<wire x1="75.8698" y1="56.5658" x2="72.2470625" y2="56.5658" width="0.254" layer="1"/>
+<wire x1="72.2470625" y1="56.5658" x2="75.8698" y2="56.5658" width="0.254" layer="1"/>
 <wire x1="72.136" y1="33.02" x2="74.0156" y2="31.1404" width="0.254" layer="1"/>
 <wire x1="74.0156" y1="31.1404" x2="80.6196" y2="31.1404" width="0.254" layer="1"/>
 <wire x1="80.6196" y1="31.1404" x2="87.63" y2="24.13" width="0.254" layer="1"/>
 <wire x1="72.136" y1="50.4792625" x2="72.136" y2="33.02" width="0.254" layer="1"/>
+<wire x1="75.8698" y1="56.5658" x2="75.8698" y2="57.8358" width="0.254" layer="1"/>
+<wire x1="75.8698" y1="57.8358" x2="78.74" y2="60.706" width="0.254" layer="1"/>
 </signal>
 <signal name="SWITCH1_LOW">
 <contactref element="SWITCH1" pad="2"/>
