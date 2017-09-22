@@ -11,47 +11,47 @@ int myLED::initialize(){
   setStatus(OFF);
 }
 
-void myLED::setStatus(char c){
-  switch(c){
+void myLED::setStatus(char c){  //turn on pins according to the commanded color
+  switch(c){  //the led has a common high pin, so a color can be turned on by setting its pin to low
     case OFF:
-      digitalWrite(PIN_R, LOW);
-      digitalWrite(PIN_G, LOW);
-      digitalWrite(PIN_B, LOW);
+      digitalWrite(PIN_R, HIGH);
+      digitalWrite(PIN_G, HIGH);
+      digitalWrite(PIN_B, HIGH);
       break;
     case RED:
-      digitalWrite(PIN_R, HIGH);
-      digitalWrite(PIN_G, LOW);
-      digitalWrite(PIN_B, LOW);
+      digitalWrite(PIN_R, LOW);
+      digitalWrite(PIN_G, HIGH);
+      digitalWrite(PIN_B, HIGH);
       break;
     case GREEN:
-      digitalWrite(PIN_R, LOW);
-      digitalWrite(PIN_G, HIGH);
-      digitalWrite(PIN_B, LOW);
+      digitalWrite(PIN_R, HIGH);
+      digitalWrite(PIN_G, LOW);
+      digitalWrite(PIN_B, HIGH);
       break;
     case BLUE:
-      digitalWrite(PIN_R, LOW);
-      digitalWrite(PIN_G, LOW);
-      digitalWrite(PIN_B, HIGH);
-      break;
-    case YELLOW:
       digitalWrite(PIN_R, HIGH);
       digitalWrite(PIN_G, HIGH);
       digitalWrite(PIN_B, LOW);
       break;
-    case MAGENTA:
-      digitalWrite(PIN_R, HIGH);
+    case YELLOW:
+      digitalWrite(PIN_R, LOW);
       digitalWrite(PIN_G, LOW);
       digitalWrite(PIN_B, HIGH);
       break;
-    case CYAN:
+    case MAGENTA:
       digitalWrite(PIN_R, LOW);
       digitalWrite(PIN_G, HIGH);
-      digitalWrite(PIN_B, HIGH);
+      digitalWrite(PIN_B, LOW);
+      break;
+    case CYAN:
+      digitalWrite(PIN_R, HIGH);
+      digitalWrite(PIN_G, LOW);
+      digitalWrite(PIN_B, LOW);
       break;
     case WHITE:
-      digitalWrite(PIN_R, HIGH);
-      digitalWrite(PIN_G, HIGH);
-      digitalWrite(PIN_B, HIGH);
+      digitalWrite(PIN_R, LOW);
+      digitalWrite(PIN_G, LOW);
+      digitalWrite(PIN_B, LOW);
       break;
   }
 }

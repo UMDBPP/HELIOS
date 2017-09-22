@@ -1,6 +1,7 @@
 #include "ccsds_xbee.h"
 #include "Arduino.h"
 #include "myXbee.h"
+#include "myPins.h"
 
 boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
   if(getAPID(Pkt_Buff) != AP_ID_CMD){ //check that we have the correct AP_ID
@@ -13,7 +14,7 @@ boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
   }
   if(!packetHasValidChecksum(ERROR_CODE_BAD_CHECKSUM)){  //check that we have received a valid checksum
     sendError(5);
-    //return 0;
+    //return 0; //this was removed because it was happening repeatedly even when signals went through, should be investigated further
   }
 
   if (HELIOS_DEBUG) Serial.println((String)millis() + "Valid packet has been received");
@@ -92,24 +93,24 @@ boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
   }
 }
 
-uint32_t myXbee::getCommandedTime(){return lastCommandedTime;}
+uint32_t myXbee::getCommandedTime(){return lastCommandedTime;}  //utility functions to get variables
 
 uint8_t myXbee::getLastCommand(){return lastCommand;}
 
-int myXbee::initialize(){
-  XbeeSerial.begin(9600); //start commmunication with xbee
-  uint8_t initstat = xbee.init(XBEE_THIS_ADDR, XBee_PAN_ID, XbeeSerial);
+int myXbee::initialize(){ //initialize the xbee and return valve if there is an error
+  Xbee_Serial.begin(9600); //start commmunication with xbee
+  uint8_t initstat = xbee.init(XBEE_THIS_ADDR, XBee_PAN_ID, Xbee_Serial);
   if(!initstat) {
-    Serial.println("XBee Initialized!");
+    if(HELIOS_DEBUG) Serial.println("XBee Initialized!");
     return 1;
   } else {
-    Serial.print("XBee Failed to Initialize with Error Code: ");
-    Serial.println(initstat);
+    if(HELIOS_DEBUG) Serial.print("XBee Failed to Initialize with Error Code: ");
+    if(HELIOS_DEBUG) Serial.println(initstat);
     return 0;
   }
 }
     
-void myXbee::sendData(uint32_t altitude, float ascentVelocity){
+void myXbee::sendData(uint32_t altitude, float ascentVelocity){ //function to send the altitude and ascent velocity upon request
   uint8_t payload_buff[PKT_MAX_LEN]; // create a buffer in which to compile the payload of the packet
   uint8_t payload_size = 0; // initalize a counter to keep track of the length of the payload
   payload_size = addIntToTlm(numTries, payload_buff, payload_size);  //compile the payload
@@ -122,7 +123,7 @@ void myXbee::sendData(uint32_t altitude, float ascentVelocity){
   numTries++; //increment the number of messages we have sent
 }
     
-void myXbee::sendError(uint8_t errCode){
+void myXbee::sendError(uint8_t errCode){  //function to send an error code
   uint8_t payload_buff[PKT_MAX_LEN]; // create a buffer in which to compile the payload of the packet
   uint8_t payload_size = 0; // initalize a counter to keep track of the length of the payload
   payload_size = addIntToTlm(numTries, payload_buff, payload_size);  //compile the payload
@@ -134,7 +135,7 @@ void myXbee::sendError(uint8_t errCode){
   numTries++; //increment the number of messages we have sent
 }
     
-void myXbee::sendConf(uint8_t confCode, int32_t confTime){
+void myXbee::sendConf(uint8_t confCode, int32_t confTime){  //function to send a confirmation code plus a number indicated the vlaue received
   uint8_t payload_buff[PKT_MAX_LEN]; // create a buffer in which to compile the payload of the packet
   uint8_t payload_size = 0; // initalize a counter to keep track of the length of the payload
   payload_size = addIntToTlm(numTries, payload_buff, payload_size);  //compile the payload
@@ -147,7 +148,7 @@ void myXbee::sendConf(uint8_t confCode, int32_t confTime){
   numTries++; //increment the number of messages we have sent
 }
     
-boolean myXbee::receive(){
+boolean myXbee::receive(){  //function to check continuously if the xbee received any data
   uint8_t Pkt_Buff[PKT_MAX_LEN];
   uint8_t pktLength = 0;
   uint8_t bytes_read = 0;

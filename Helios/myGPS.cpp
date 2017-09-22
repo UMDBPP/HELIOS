@@ -1,6 +1,7 @@
 #include <Adafruit_GPS.h> //include gps library
 #include <Arduino.h>  //include arduino library to recognize keywords
 #include "myGPS.h"
+#include "myPins.h"
 
 #if USING_GPS
 #define GPSECHO false

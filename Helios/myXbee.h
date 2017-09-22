@@ -11,7 +11,6 @@
 
 #define _NO_RTC_
 #define PKT_MAX_LEN 100
-#define XbeeSerial Serial3 //Pins 14 and 15, the location of the xbee on balloonduino board
 
 class myXbee{
   private:

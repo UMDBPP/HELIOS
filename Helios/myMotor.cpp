@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "myMotor.h"
 
-int myMotor::initialize(){
+void myMotor::initialize(){
   pinMode(PIN_MOTOR_A, OUTPUT);
   pinMode(PIN_MOTOR_B, OUTPUT);
   pinMode(PIN_MOTOR_PWM, OUTPUT);
@@ -9,7 +9,6 @@ int myMotor::initialize(){
   digitalWrite(PIN_MOTOR_B, LOW);
   digitalWrite(PIN_MOTOR_PWM, LOW);
   if (HELIOS_DEBUG) Serial.println("Motor pins have been initialized");
-  return 1;
 }
 
 void myMotor::startFan(void){//turns fan on to prespecified speed

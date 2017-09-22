@@ -7,10 +7,11 @@
 
 #define HELIOS_DEBUG false
 #include "Arduino.h"
+#include "myPins.h"
 
 class myDatalog{
   private:
-    const static int SD_CHIP_SELECT = 53; //chip select for SPI card writer on a balloonduino
+    const static int SD_CHIP_SELECT = CS_SD; //chip select for SPI card writer on a balloonduino
     
   public:
     int initialize();
