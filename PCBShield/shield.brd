@@ -305,6 +305,9 @@
 <wire x1="-1.27" y1="22.86" x2="-1.27" y2="-1.27" width="0.127" layer="21"/>
 <text x="-1.27" y="-2.54" size="1.27" layer="25">&gt;Name</text>
 </package>
+<package name="6BOLT">
+<pad name="P$1" x="0" y="0" drill="3.556" diameter="5.08"/>
+</package>
 </packages>
 </library>
 <library name="st-microelectronics" urn="urn:adsk.eagle:library:368">
@@ -1725,6 +1728,7 @@ design rules under a new name.</description>
 <element name="3V_1" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" package="1X02_2.54_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1" value="" x="82.55" y="78.232"/>
 <element name="3V_2" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" package="1X02_2.54_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1" value="" x="88.138" y="78.232"/>
 <element name="3V_3" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" package="1X02_2.54_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1" value="" x="93.98" y="78.232"/>
+<element name="U$1" library="specialparts" package="6BOLT" value="6BOLT" x="137.287" y="83.947"/>
 </elements>
 <signals>
 <signal name="+5V">
@@ -1991,6 +1995,14 @@ design rules under a new name.</description>
 <wire x1="62.103" y1="35.687" x2="61.468" y2="35.052" width="0.254" layer="1"/>
 <via x="74.93" y="29.083" extent="1-16" drill="0.35"/>
 <wire x1="74.93" y1="24.13" x2="74.93" y2="29.083" width="0.254" layer="1"/>
+<contactref element="U$1" pad="P$1"/>
+<polygon width="0.508" layer="1">
+<vertex x="43.18" y="87.63"/>
+<vertex x="158.75" y="87.63"/>
+<vertex x="158.75" y="19.05"/>
+<vertex x="43.307" y="19.05"/>
+<vertex x="43.18" y="19.05"/>
+</polygon>
 </signal>
 <signal name="BRIDGE1_PWM">
 <contactref element="BRIDGE1-2" pad="1"/>

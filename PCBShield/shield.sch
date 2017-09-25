@@ -4177,6 +4177,9 @@ librarian@cadsoft.de</description>
 <wire x1="-1.27" y1="22.86" x2="-1.27" y2="-1.27" width="0.127" layer="21"/>
 <text x="-1.27" y="-2.54" size="1.27" layer="25">&gt;Name</text>
 </package>
+<package name="6BOLT">
+<pad name="P$1" x="0" y="0" drill="3.556" diameter="5.08"/>
+</package>
 </packages>
 <symbols>
 <symbol name="N-CHANNEL">
@@ -4414,6 +4417,10 @@ librarian@cadsoft.de</description>
 <text x="-2.54" y="-5.08" size="1.27" layer="94">&gt;Name</text>
 <text x="-2.54" y="-7.62" size="1.27" layer="94">&gt;Value</text>
 </symbol>
+<symbol name="6BOLT">
+<circle x="0" y="0" radius="5.08" width="0.254" layer="94"/>
+<pin name="P$1" x="0" y="0" length="middle"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="FQP85N06">
@@ -4650,6 +4657,22 @@ SparkFun DEV13743</description>
 <connect gate="G$1" pin="MOSI" pad="MOSI"/>
 <connect gate="G$1" pin="SCK" pad="SCK"/>
 <connect gate="G$1" pin="VIN" pad="VIN"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="6BOLT">
+<description>Hole for a size #6 bolt for ESD strap attachment.</description>
+<gates>
+<gate name="G$1" symbol="6BOLT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="6BOLT">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -6036,6 +6059,8 @@ part number 2062-2P from STA</description>
 <part name="3V_2" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="2.54MM_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1"/>
 <part name="3V_3" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_02" device="2.54MM_SCREWTERM" package3d_urn="urn:adsk.eagle:package:38059/1"/>
 <part name="P+28" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
+<part name="U$1" library="specialparts" deviceset="6BOLT" device=""/>
+<part name="GND42" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6212,6 +6237,8 @@ part number 2062-2P from STA</description>
 <instance part="3V_1" gate="G$1" x="187.96" y="15.24"/>
 <instance part="3V_2" gate="G$1" x="187.96" y="35.56"/>
 <instance part="3V_3" gate="G$1" x="187.96" y="55.88"/>
+<instance part="U$1" gate="G$1" x="132.08" y="139.7"/>
+<instance part="GND42" gate="1" x="147.32" y="137.16"/>
 </instances>
 <busses>
 </busses>
@@ -6737,6 +6764,11 @@ part number 2062-2P from STA</description>
 <pinref part="GND31" gate="1" pin="GND"/>
 <pinref part="3.3V-REGULATOR" gate="G$1" pin="GND"/>
 <wire x1="119.38" y1="160.02" x2="119.38" y2="162.56" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="U$1" gate="G$1" pin="P$1"/>
+<pinref part="GND42" gate="1" pin="GND"/>
+<wire x1="132.08" y1="139.7" x2="147.32" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="BRIDGE1_PWM" class="0">
