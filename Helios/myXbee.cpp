@@ -87,8 +87,8 @@ boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
   } else if (command == 15){ //this is the command to run the fan backwards indefinitely with nothing else
     lastCommand = COMMAND_TEST_REV;
     return 1;
-  } else if (command == 16){ //this is the kill all command, FYI this currently does nothing
-    lastCommand = COMMAND_KILL;
+  } else if (command == 16){ //this is the reset command, FYI this currently does nothing
+    lastCommand = COMMAND_RESET;
     return 1;
   }
 }

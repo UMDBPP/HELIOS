@@ -50,7 +50,7 @@ class myXbee{
     const static int COMMAND_TEST_CLOSE = 6;
     const static int COMMAND_TEST_FWD = 7;
     const static int COMMAND_TEST_REV = 8;
-    const static int COMMAND_KILL = 9;
+    const static int COMMAND_RESET = 9;
     const static int COMMAND_SET_TIME = 10;
     const static int COMMAND_SET_ALT = 11;
 

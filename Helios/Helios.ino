@@ -21,10 +21,11 @@
 #include<Wire.h>  //Required for I2C communication with SSC and BME sensors
 
 //First line printed identifies what each data column is
-#define HEADER_STRING "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed"
+//#define HEADER_STRING "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,Out_Temperature_Raw,valveHasOpened,Valve_Closed"
 
 //Control Parameters
 int32_t altitudeToOpen = 18000; //meters  //the altitude at which to open - this can be changed only via an Xbee command
+int32_t maxAltitudeToOpen = 22000; //meters   //the max altitude at which to open - this is used to prevent from opening twice
 int32_t timeOpen = 60000; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging sensor data
@@ -59,7 +60,8 @@ boolean logged_now = 0; //used to add in a delay for other functions, such that 
 uint32_t command_timer= 0;  //keeps track of when the last command was received, commands received within myXbee.WAIT_TIME_AFTER_COMMAND will be ignored and assumed duplicates
 
 //Create objects
-myLED led(LED1_PINR, LED1_PING, LED1_PINB); //create an LED object
+myLED led(LED1_PINR, LED1_PING, LED1_PINB); //create an LED object for status purposes
+myLED armed(LED2_PINR, LED2_PING, LED2_PINB); //create an LED object to indicate if the system is armed
 myXbee xbee;  //create an Xbee object
 myActuator actuator;  //create an Actuator object
 myDatalog datalog;  //create an SD Card logger object
@@ -68,6 +70,10 @@ myMotor motor;  //create a motor module
 #if (USING_GPS) //The GPS is often troublesome, so we nest this inside an if statement so it can be readily removed for other testing
   myGPS gps;  //if using gps, create a GPS module
 #endif
+
+#define LED_ARMED armed.GREEN
+#define LED_DISARMED armed.OFF
+#define LED_OPEN armed.RED
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -127,6 +133,8 @@ void setup() {
 
   led.initialize();
   led.setStatus(led.YELLOW);  //yellow indicates power on and starting up
+  armed.initialize();
+  armed.setStatus(LED_ARMED); //green indicates that the system is currently armed
 
   if(!xbee.initialize()){
     led.setStatus(led.RED);
@@ -137,19 +145,19 @@ void setup() {
   
   actuator.initialize();
 
-  //open and close valve
+/*  //open and close valve
   valveIsOpen = actuator.openValve();
   while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
   valveIsOpen = actuator.closeValve();
   while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
-  actuator.stopValve();
+  actuator.stopValve();*/
   
   motor.initialize();
 
-  //Turn fan on and off
+/*  //Turn fan on and off
   motor.startFan();
   delay(2000);
-  motor.stopFan();
+  motor.stopFan();*/
 
   if(!honeywell.initialize(&honeywellData[0], &honeywellData[1])){
     led.setStatus(led.RED);
@@ -231,7 +239,7 @@ void loop() {
   
   //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for timeOpen seconds
   if(!valveAlreadyClosed){//if the valve has not already been opened and closed
-    if(gpsData.altitude > altitudeToOpen && logged_now){//if we are above the target altitude and we just logged data (I added the logged_now variable so that this takes a few seconds of steady measurements to become true)
+    if(gpsData.altitude > altitudeToOpen && gpsData.altitude < maxAltitudeToOpen && logged_now){//if we are above the target altitude and we just logged data (I added the logged_now variable so that this takes a few seconds of steady measurements to become true)
       valveAltitudeCheckCounter++;//add to the altitude verifier
     }
     if(valveAltitudeCheckCounter >= NUM_OF_CHECKS_BEFORE_OPEN && !valveHasOpened){//if it is time to open the valve
@@ -239,11 +247,13 @@ void loop() {
       motor.startFan();
       valveTimeAtOpen = millis(); //set the time at open so we know when to close the valve
       valveHasOpened=1; //set that the valve has opened so that it can also be closed
+      armed.setStatus(LED_OPEN); //red means that the valve is currently open
     }
     else if(valveHasOpened && millis() > (valveTimeAtOpen + timeOpen)){//if we've been open long enough
       valveAlreadyClosed=1; //set this to true so that the valve can never be reopened
       motor.stopFan();  //stop the fan and close the valve
       valveIsOpen = actuator.closeValve();
+      armed.setStatus(LED_DISARMED); //off means that the system is no longer armed
     }
   }
   //Serial.println("Loop A");
@@ -262,6 +272,7 @@ void xbeeCommand(){
     valveHasOpened = 0;
     xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, timeOpen);  //send confirmation codes that contain the time and altitude at which the valve will open
     xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, altitudeToOpen);
+    armed.setStatus(LED_ARMED); //indicates that the system is rearmed
   }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
     xbee.sendData(gpsData.altitude, ascentVelocity);  //send the most recent calculated ascent velocity and altitude to the xbee
     if(HELIOS_DEBUG) Serial.println("xbee data sent");
@@ -272,6 +283,7 @@ void xbeeCommand(){
     valveIsOpen = actuator.closeValve();  //close the valve
     xbee.sendConf(xbee.CONFIRM_CODE_ABORT, 0);  //send a code confirming that the abort command was received
     if(HELIOS_DEBUG) Serial.println("xbee has commanded abort");
+    armed.setStatus(LED_DISARMED);
   }else if (xbee.getLastCommand() == xbee.COMMAND_VENT_NOW){  //an open valve now command
     valveAlreadyClosed = 0; //reset this parameter so that the code is capable of closing the valve
     valveIsOpen = actuator.openValve(); //open the valve and start the fan
@@ -281,6 +293,7 @@ void xbeeCommand(){
     valveHasOpened = 1;
     xbee.sendConf(xbee.CONFIRM_CODE_VENT, timeOpen); //send confirmation code along with the commanded time
     if (HELIOS_DEBUG) Serial.println("Helios will open valve for " + (String)timeOpen + " milliseconds");
+    armed.setStatus(LED_OPEN);
   }else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){  //command to reset the amount of time to stay open
     timeOpen = xbee.getCommandedTime();
     xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, timeOpen); //send confirmation message confirming the time received
@@ -296,6 +309,7 @@ void xbeeCommand(){
     valveHasOpened = 1;
     xbee.sendConf(xbee.CONFIRM_CODE_REVERSE, timeOpen); //send confirmation code along with the amount of time commanded
     if(HELIOS_DEBUG) Serial.println("Helios will run fan in reverse for " + (String)timeOpen + " seconds");
+    armed.setStatus(LED_OPEN);
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){ //the next four commands are to control the payload without consideration of other code parameters
     actuator.openValve();
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_OPEN);
@@ -308,8 +322,8 @@ void xbeeCommand(){
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
     motor.reverseFan();
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV);
-  }else if (xbee.getLastCommand() == xbee.COMMAND_KILL){
-    // make a kill switch in the LVC maybe
+  }else if (xbee.getLastCommand() == xbee.COMMAND_RESET){
+    // figure out the code required to reset a system
     xbee.sendConf(xbee.CONFIRM_CODE_KILL, 0);
   }
   datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()) + ", " + (String)(xbee.getCommandedTime()));  //log whatever command was received to the datalog
