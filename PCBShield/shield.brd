@@ -1996,7 +1996,7 @@ design rules under a new name.</description>
 <via x="74.93" y="29.083" extent="1-16" drill="0.35"/>
 <wire x1="74.93" y1="24.13" x2="74.93" y2="29.083" width="0.254" layer="1"/>
 <contactref element="U$1" pad="P$1"/>
-<polygon width="0.508" layer="1">
+<polygon width="0.254" layer="1" isolate="0.254">
 <vertex x="43.18" y="87.63"/>
 <vertex x="158.75" y="87.63"/>
 <vertex x="158.75" y="19.05"/>
