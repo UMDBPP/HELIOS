@@ -2,12 +2,12 @@
 
 //these parameters correspond to the PCB print
 #define LED1_PINR 32
-#define LED1_PING 35
-#define LED1_PINB 33
+#define LED1_PING 33
+#define LED1_PINB 35
 
 #define LED2_PINR 34
-#define LED2_PING 36
-#define LED2_PINB 37
+#define LED2_PING 37
+#define LED2_PINB 36
 
 #define BRIDGE1_PWM 2
 #define BRIDGE1_A 40

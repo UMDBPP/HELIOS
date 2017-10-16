@@ -9,6 +9,44 @@ TELEMETRY HELIOS TLM_PKT BIG_ENDIAN "Helios Telemetry"
 	UNITS MeterPerSecond m/s
 	FORMAT_STRING "%0.6f"
     
+TELEMETRY HELIOS TLM_PKT BIG_ENDIAN "Helios All Data"
+  <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 820} %>
+  <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>
+  APPEND_ITEM Number 16 UINT "Transmission Number"
+  APPEND_ITEM Altitude 32 INT "Current Altitude"
+	UNITS Meter m
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Lat_Deg 8 UINT "Latitude Degrees"
+    Units Degrees
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Lat_Min 32 FLOAT "Latitude Decimal Minutes"
+    Units Minutes
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Lon_Deg 8 UINT "Longitude Degrees"
+    Units Degrees
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Lon_Min 32 FLOAT "Longitude Decimal Minutes"
+    Units Minutes
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM AscVelocity 32 FLOAT "Last Ascent Velocity"
+	UNITS MeterPerSecond m/s
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Pres_In 32 FLOAT "Pressure Inside Balloon"
+    UNITS Pascals Pa
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Pres_Out 32 FLOAT "Pressure Outside Balloon"
+    UNITS Pascals Pa
+    FORMAT_STRING "%0.6f"
+  APPEND_ITEM Temp_In 32 FLOAT "Temperature Inside Balloon"
+    UNITS Degrees C
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM Temp_Out 32 FLOAT "Temperature Outside Balloon"
+    UNITS Degrees C
+	FORMAT_STRING "%0.6f"
+  APPEND_ITEM ValveState 32 FLOAT "Valve Position"
+    UNITS Millimeters mm
+    FORMAT_STRING "%0.6f"
+    
 TELEMETRY HELIOS CONF_PKT BIG_ENDIAN "Helios Valve Confirmation"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_tlm.txt", locals: {apid: 850} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_tlm.txt" %>

@@ -14,6 +14,7 @@ struct myHoneywellData{ //Preferred data structure for each sensor
   uint8_t status;
   uint16_t rawPressure;
   uint16_t rawTemperature;
+  uint8_t el;
 };
 
 class myHoneywell{
@@ -29,10 +30,10 @@ class myHoneywell{
     void selectSensor(uint8_t i);
 
   public:
-    const static uint8_t TCA_INSIDE_SENSOR = 0;   //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
-    const static uint8_t TCA_OUTSIDE_SENSOR = 1;  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
+    const static uint8_t TCA_INSIDE_SENSOR = 1;   //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
+    const static uint8_t TCA_OUTSIDE_SENSOR = 0;  //SD#/SC# for the pressure sensor outside the balloon on the multiplexer
 
-    int initialize(myHoneywellData *data1, myHoneywellData *data2);
+    void initialize(myHoneywellData *data1, myHoneywellData *data2);
     void read(myHoneywellData *data, uint8_t sensor);
 };
 

@@ -8,6 +8,9 @@ myLED::myLED(int r, int g, int b){
 }
 
 int myLED::initialize(){
+  pinMode(PIN_R, OUTPUT);
+  pinMode(PIN_G, OUTPUT);
+  pinMode(PIN_B, OUTPUT);
   setStatus(OFF);
 }
 

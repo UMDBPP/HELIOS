@@ -90,7 +90,11 @@ boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
   } else if (command == 16){ //this is the reset command, FYI this currently does nothing
     lastCommand = COMMAND_RESET;
     return 1;
+  } else if (command == 17){
+    lastCommand = COMMAND_ALL_DATA;
+    return 1;
   }
+  return 0;
 }
 
 uint32_t myXbee::getCommandedTime(){return lastCommandedTime;}  //utility functions to get variables
@@ -122,7 +126,27 @@ void myXbee::sendData(uint32_t altitude, float ascentVelocity){ //function to se
   
   numTries++; //increment the number of messages we have sent
 }
-    
+
+void myXbee::sendAllData(uint32_t altitude, uint8_t lat_deg, float lat_min, uint8_t lon_deg, float lon_min, float velocity, float pres_in, float pres_out, float temp_in, float temp_out, float position){
+  uint8_t payload_buff[PKT_MAX_LEN]; // create a buffer in which to compile the payload of the packet
+  uint8_t payload_size = 0; // initalize a counter to keep track of the length of the payload
+  payload_size = addIntToTlm(numTries, payload_buff, payload_size);  //compile the payload
+  payload_size = addIntToTlm(altitude, payload_buff, payload_size);
+  payload_size = addIntToTlm(lat_deg, payload_buff, payload_size);
+  payload_size = addFloatToTlm(lat_min, payload_buff, payload_size);
+  payload_size = addIntToTlm(lon_deg, payload_buff, payload_size);
+  payload_size = addFloatToTlm(lon_min, payload_buff, payload_size);
+  payload_size = addFloatToTlm(velocity, payload_buff, payload_size);
+  payload_size = addFloatToTlm(pres_in, payload_buff, payload_size);
+  payload_size = addFloatToTlm(pres_out, payload_buff, payload_size);
+  payload_size = addFloatToTlm(temp_in, payload_buff, payload_size);
+  payload_size = addFloatToTlm(temp_out, payload_buff, payload_size);
+  payload_size = addFloatToTlm(position, payload_buff, payload_size);
+  uint32_t pre_send = xbee.getSentPktCtr();
+  xbee.sendTlmMsg(XBEE_WRITE_ADDR, AP_ID_DATA, payload_buff, payload_size); //note that we are not checking that the packet sent successfully; if it does not send, it is up to the user to ask again
+  numTries++; //increment the number of messages we have sent
+}
+
 void myXbee::sendError(uint8_t errCode){  //function to send an error code
   uint8_t payload_buff[PKT_MAX_LEN]; // create a buffer in which to compile the payload of the packet
   uint8_t payload_size = 0; // initalize a counter to keep track of the length of the payload

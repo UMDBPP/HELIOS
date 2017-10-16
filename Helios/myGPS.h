@@ -7,7 +7,7 @@
 
 #define USING_GPS true
 
-#define HELIOS_DEBUG false
+#define HELIOS_DEBUG true
 #include "Arduino.h"
 #include <Adafruit_GPS.h>
 

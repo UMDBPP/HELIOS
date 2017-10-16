@@ -5,7 +5,7 @@
 #ifndef LogFunctions
 #define LogFunctions
 
-#define HELIOS_DEBUG false
+#define HELIOS_DEBUG true
 #include "Arduino.h"
 #include "myPins.h"
 

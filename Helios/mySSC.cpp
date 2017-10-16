@@ -12,12 +12,11 @@ void myHoneywell::selectSensor(uint8_t i){//selects which pressure sensor we're 
   Wire.endTransmission(); //end transmission to multiplexer
 }
 
-int myHoneywell::initialize(myHoneywellData *data1, myHoneywellData *data2) { //initialize the sensors by initializing their data structures
+void myHoneywell::initialize(myHoneywellData *data1, myHoneywellData *data2) { //initialize the sensors by initializing their data structures
   Wire.begin(); //this method doesn't actually do anything to check that the sensors are connected
   data1 = {};
   data2 = {};
   if (HELIOS_DEBUG) Serial.println("Two honeywell sensors initialized");
-  return 1;
 }
 
 void myHoneywell::read(myHoneywellData *data, uint8_t sensor) {  //Read data from a specific sensor and store it in the given memory structure
@@ -58,6 +57,7 @@ void myHoneywell::read(myHoneywellData *data, uint8_t sensor) {  //Read data fro
     data->rawTemperature=ps.temperature_data;
     data->pressure = p;
     data->temperature = t;
+    data->el = el;
   }
   return;
 }

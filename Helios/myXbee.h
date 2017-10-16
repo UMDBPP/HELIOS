@@ -5,7 +5,7 @@
 #ifndef XbeeFunctions
 #define XbeeFunctions
 
-#define HELIOS_DEBUG false
+#define HELIOS_DEBUG true
 #include "Arduino.h"
 #include "ccsds_xbee.h"
 
@@ -19,6 +19,7 @@ class myXbee{
     const static int XBee_PAN_ID = 0x0B0B;
     const static int AP_ID_CMD = 800;   //the AP_ID that we must see whenever we receive a packet
     const static int AP_ID_TLM = 810;   //the AP_ID that will be used to send all telemetry packets
+    const static int AP_ID_DATA = 820;
     const static int AP_ID_ERR = 890;   //the AP_ID that will be used to send all error packets
     const static int AP_ID_CON = 850;   //the AP_ID used to send a confirmation
     const static uint32_t TIME_TO_VENT = 200000; //this is the time for which the valve will vent air if commanded forward without a time
@@ -36,6 +37,7 @@ class myXbee{
     uint32_t getCommandedTime();
     uint8_t getLastCommand();
     void sendData(uint32_t altitude, float ascentVelocity);
+    void sendAllData(uint32_t altitude, uint8_t lat_deg, float lat_min, uint8_t lon_deg, float lon_min, float velocity, float pres_in, float pres_out, float temp_in, float temp_out, float position);
     void sendError(uint8_t errCode);
     void sendConf(uint8_t confCode, int32_t confTime);    
     boolean receive();
@@ -53,6 +55,7 @@ class myXbee{
     const static int COMMAND_RESET = 9;
     const static int COMMAND_SET_TIME = 10;
     const static int COMMAND_SET_ALT = 11;
+    const static int COMMAND_ALL_DATA = 12;
 
     const static int ERROR_CODE_NEGATIVE = 1;
     const static int ERROR_CODE_BAD_LENGTH = 2;
