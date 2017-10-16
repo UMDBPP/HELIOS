@@ -219,8 +219,7 @@ void setup() {
     delay(5000);
   }
   //wait for the gps to get a fix before starting up
-  //while(!gpsData.fix)
-    gps.read(&gpsData);
+  //while(!gpsData.fix) gps.read(&gpsData);
   led.setStatus(led.MAGENTA); //magenta is a reminder that the gps is active
   delay(2000);
 #else
@@ -244,9 +243,9 @@ void loop() {
     Serial.println(availableMemory());
   }*/
   
-  #if (USING_GPS)
-    gps.read(&gpsData);
-  #endif
+#if (USING_GPS)
+  gps.read(&gpsData);
+#endif
 
   if (gpsData.fix)  //the led will turn off once the GPS has a fix
     led.setStatus(led.OFF);
