@@ -35,5 +35,11 @@
 #define SPI_SS3 48
 #define SPI_SS4 49
 
+#define TCA_HONEYWELL_INSIDE_ADDR 0
+#define TCA_HONETWELL_OUTSIDE_ADDR 1
+#define TCA_BME_INSIDE_ADDR 2
+#define TCA_BME_OUTSIDE_ADDR 3
+#define TCA_UNUSED 5
+
 #define GPS_Serial Serial2
 #define Xbee_Serial Serial3

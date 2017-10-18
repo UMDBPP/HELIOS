@@ -13,7 +13,10 @@ void myHoneywell::selectSensor(uint8_t i){//selects which pressure sensor we're 
 }
 
 void myHoneywell::initialize(myHoneywellData *data1, myHoneywellData *data2) { //initialize the sensors by initializing their data structures
-  Wire.begin(); //this method doesn't actually do anything to check that the sensors are connected
+  //this method doesn't actually do anything to check that the sensors are connected
+  if (TWCR == 0){ // if Wire library is not already initialized
+    Wire.begin();
+  }
   data1 = {};
   data2 = {};
   if (HELIOS_DEBUG) Serial.println("Two honeywell sensors initialized");

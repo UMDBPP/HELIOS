@@ -16,7 +16,7 @@
 #include "myXbee.h" //defines functions for interacting with xbees - note that this libary is just about communications, the actual command handling is at the end of this file
 #include "myAct.h"  //defines functions for extending and reading the actuator
 #include "myLog.h"  //defines functions for interacting with SD card logging
-//#include "myBME.h"  //defines functions for working with BME280 pressure sensors
+#include "myBME.h"  //defines functions for working with BME280 pressure sensors
 
 #include<Wire.h>  //Required for I2C communication with SSC and BME sensors
 
@@ -52,6 +52,7 @@ uint8_t logsCounter = 0;  //counts the number of loops since the last time ascen
 
 //Data structures
 myHoneywellData honeywellData[2]; //structure for storing honeywell data
+myBMEData bmeData[2]; //structure for storing honeywell data
 myGPSData gpsData;  //structure for storing gps data separate of the adafruit gps class
 
 //For log timing
@@ -69,6 +70,7 @@ myXbee xbee;  //create an Xbee object
 myActuator actuator;  //create an Actuator object
 myDatalog datalog;  //create an SD Card logger object
 myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module
+myBME bme; //create a BME280 sensor object to manage the BMEs
 myMotor motor;  //create a motor module
 #if (USING_GPS) //The GPS is often troublesome, so we nest this inside an if statement so it can be readily removed for other testing
   myGPS gps;  //if using gps, create a GPS module
@@ -178,8 +180,8 @@ void setup() {
   
   motor.initialize();
 
-  pinMode(ACT2_READ, INPUT);
-  if (digitalRead(ACT2READ) == HIGH){ //Only actuate on startup if the switch is set to do so.
+  pinMode(ACT2_READ, INPUT_PULLUP);
+  if (digitalRead(ACT2READ) == LOW){ //Only actuate on startup if the switch is set to do so.
     //open and close valve
     valveIsOpen = actuator.openValve();
     while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
@@ -193,10 +195,12 @@ void setup() {
     motor.stopFan();*/
   }
 
-  honeywell.initialize(&honeywellData[0], &honeywellData[1])){
+  honeywell.initialize(&honeywellData[honeywell.TCA_INSIDE_SENSOR], &honeywellData[honeywell.TCA_OUTSIDE_SENSOR])){
 
-  /*if(!bme.initialize())
-    led.setStatus(led.RED);*/
+  if(!bme.initialize(&bmeData[bme.TCA_INSIDE_SENSOR], &bmeData[bme.TCA_OUTSIDE_SENSOR])){
+    led.setStatus(led.RED);
+    delay(5000);
+  }
 
   //implement something to check that all the pressure sensors are recording the correct data
 
@@ -368,9 +372,8 @@ void xbeeCommand(){
 void logData(){
   honeywell.read(&honeywellData[honeywell.TCA_INSIDE_SENSOR], honeywell.TCA_INSIDE_SENSOR);
   honeywell.read(&honeywellData[honeywell.TCA_OUTSIDE_SENSOR], honeywell.TCA_OUTSIDE_SENSOR);
-  /*getBME(2);
-  getBME(3);
-  getBME(4);*/
+  bme.read(&bmeData[bme.TCA_INSIDE_SENSOR], bme.TCA_INSIDE_SENSOR);
+  bme.read(&bmeData[bme.TCA_OUTSIDE_SENSOR], bme.TCA_OUTSIDE_SENSOR);
   logsCounter++;
   if (logsCounter == ASCENT_CALC_FREQUENCY){ //send data less frequently to the trinket
     ascentVelocity = 1.0*(gpsData.altitude - oldAltitude)/(millis() - oldTime);
@@ -419,20 +422,20 @@ void logData(){
   dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].rawTemperature + ",";
   dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].el + ",";
   
-  /*dataString += (String)bmeData[0].pressure + ",";
-  dataString += (String)bmeData[0].temperature + ",";
-  dataString += (String)bmeData[0].humidity + ",";
-  dataString += (String)bmeData[0].altitude + ",";
+  dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].pressure + ",";
+  dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].temperature + ",";
+  dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].humidity + ",";
+  dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].altitude + ",";
 
-  dataString += (String)bmeData[1].pressure + ",";
-  dataString += (String)bmeData[1].temperature + ",";
-  dataString += (String)bmeData[1].humidity + ",";
-  dataString += (String)bmeData[1].altitude + ",";
+  dataString += (String)bmeData[bme.TCA_OUTSIDE_SENSOR].pressure + ",";
+  dataString += (String)bmeData[bme.TCA_OUTSIDE_SENSOR].temperature + ",";
+  dataString += (String)bmeData[bme.TCA_OUTSIDE_SENSOR].humidity + ",";
+  dataString += (String)bmeData[bme.TCA_OUTSIDE_SENSOR].altitude + ",";
 
-  dataString += (String)bmeData[2].pressure + ",";
-  dataString += (String)bmeData[2].temperature + ",";
-  dataString += (String)bmeData[2].humidity + ",";
-  dataString += (String)bmeData[2].altitude + ",";*/
+  /*dataString += (String)bmeData[bme.TCA_BOX_SENSOR].pressure + ",";
+  dataString += (String)bmeData[bme.TCA_BOX_SENSOR].temperature + ",";
+  dataString += (String)bmeData[bme.TCA_BOX_SENSOR].humidity + ",";
+  dataString += (String)bmeData[bme.TCA_BOX_SENSOR].altitude + ",";*/
 
   dataString += (String)ascentVelocity + ",";
   dataString += (String)actuator.position() + ",";
