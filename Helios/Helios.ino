@@ -95,12 +95,14 @@ void setup(){
   //if(!datalog.initialize()) Serial.println("Log error");
   //if(!gps.initialize(&gpsData)) Serial.println("GPS Error");
   //if(!honeywell.initialize(&honeywellData[0], &honeywellData[1])) Serial.println("Honeywell Error");
+  if(!bme.initialize(&bmeData[0], &bmeData[1])){ Serial.println("BME Error"); led.setStatus(led.RED);}
   delay(1000);
-  valveIsOpen = actuator.openValve();
+  //valveIsOpen = actuator.openValve();
+  led.setStatus(led.GREEN);
 }
 
 void loop(){
-  Serial.println(actuator.position());
+  /*Serial.println(actuator.position());
   if (valveIsOpen && actuator.position() < actuator.START){ //if valve has finished opening, turn it off
     actuator.stopValve();
     valveIsOpen = actuator.closeValve();
@@ -110,7 +112,20 @@ void loop(){
     actuator.stopValve();
     valveIsOpen = actuator.openValve();
     motor.startFan();
-  }
+  }*/
+  bme.read(&bmeData[bme.TCA_INSIDE_SENSOR], bme.TCA_INSIDE_SENSOR);
+  bme.read(&bmeData[bme.TCA_OUTSIDE_SENSOR], bme.TCA_OUTSIDE_SENSOR);
+  Serial.print("Inside: ");
+  Serial.print(bmeData[bme.TCA_INSIDE_SENSOR].pressure); Serial.print(", ");
+  Serial.print(bmeData[bme.TCA_INSIDE_SENSOR].temperature); Serial.print(", ");
+  Serial.print(bmeData[bme.TCA_INSIDE_SENSOR].humidity); Serial.print(", ");
+  Serial.println(bmeData[bme.TCA_INSIDE_SENSOR].altitude);
+  Serial.print("Outside: ");
+  Serial.print(bmeData[bme.TCA_OUTSIDE_SENSOR].pressure); Serial.print(", ");
+  Serial.print(bmeData[bme.TCA_OUTSIDE_SENSOR].temperature); Serial.print(", ");
+  Serial.print(bmeData[bme.TCA_OUTSIDE_SENSOR].humidity); Serial.print(", ");
+  Serial.println(bmeData[bme.TCA_OUTSIDE_SENSOR].altitude);
+  delay(500);
   //honeywell.read(&honeywellData[1], 1);
   //Serial.print(honeywellData[1].pressure);
   //Serial.print("   ");
@@ -181,21 +196,21 @@ void setup() {
   motor.initialize();
 
   pinMode(ACT2_READ, INPUT_PULLUP);
-  if (digitalRead(ACT2READ) == LOW){ //Only actuate on startup if the switch is set to do so.
+  if (digitalRead(ACT2_READ) == LOW){ //Only actuate on startup if the switch is set to do so.
     //open and close valve
     valveIsOpen = actuator.openValve();
     while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
     valveIsOpen = actuator.closeValve();
     while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
-    actuator.stopValve();*/
+    actuator.stopValve();
   
     //Turn fan on and off
     motor.startFan();
     delay(2000);
-    motor.stopFan();*/
+    motor.stopFan();
   }
 
-  honeywell.initialize(&honeywellData[honeywell.TCA_INSIDE_SENSOR], &honeywellData[honeywell.TCA_OUTSIDE_SENSOR])){
+  honeywell.initialize(&honeywellData[honeywell.TCA_INSIDE_SENSOR], &honeywellData[honeywell.TCA_OUTSIDE_SENSOR]);
 
   if(!bme.initialize(&bmeData[bme.TCA_INSIDE_SENSOR], &bmeData[bme.TCA_OUTSIDE_SENSOR])){
     led.setStatus(led.RED);
