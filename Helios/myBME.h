@@ -27,8 +27,8 @@ class myBME{
   
   public:
     myBME();
-    const static uint8_t TCA_INSIDE_SENSOR = 0;   //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
-    const static uint8_t TCA_OUTSIDE_SENSOR = 1; 
+    const static uint8_t TCA_INSIDE_SENSOR = 1;   //SD#/SC# for the pressure sensor inside the balloon on the multiplexer
+    const static uint8_t TCA_OUTSIDE_SENSOR = 0; 
 
     int initialize(myBMEData *data1, myBMEData *data2);
     void read(myBMEData *data, uint8_t sensor);

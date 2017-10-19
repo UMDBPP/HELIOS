@@ -22,8 +22,22 @@ void myHoneywell::initialize(myHoneywellData *data1, myHoneywellData *data2) { /
   if (HELIOS_DEBUG) Serial.println("Two honeywell sensors initialized");
 }
 
+uint8_t myHoneywell::getSensorLocation(uint8_t sensor_number){
+  //returns the physical location of the sensor when given the array index of the sensor
+  switch(sensor_number){
+    case TCA_INSIDE_SENSOR:
+      return INSIDE_ADDR;
+      break;
+    case TCA_OUTSIDE_SENSOR:
+      return OUTSIDE_ADDR;
+      break;
+    default:
+      return UNUSED_ADDR;
+  }
+}
+
 void myHoneywell::read(myHoneywellData *data, uint8_t sensor) {  //Read data from a specific sensor and store it in the given memory structure
-  selectSensor(sensor); //select to talk to the desired sensor
+  selectSensor(getSensorLocation(sensor)); //select to talk to the desired sensor
   struct cs_raw ps; //initialize a structure and other variables to use with sensor library
   //char p_str[10], t_str[10];
   uint8_t el;

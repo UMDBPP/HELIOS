@@ -85,7 +85,7 @@ myMotor motor;  //create a motor module
 #if DEBUG_MODE  //if we are in debug mode, skip turning on everything and just follow this abbreviated code
 
 void setup(){
-  delay(5000);
+  /*delay(5000);
   Serial.begin(115200);
   led.initialize();
   armed.initialize();
@@ -98,7 +98,53 @@ void setup(){
   if(!bme.initialize(&bmeData[0], &bmeData[1])){ Serial.println("BME Error"); led.setStatus(led.RED);}
   delay(1000);
   //valveIsOpen = actuator.openValve();
-  led.setStatus(led.GREEN);
+  led.setStatus(led.GREEN);*/
+
+  //THERMAL TEST CODE
+  delay(5000); //wait to initialize so we can connect anything we might need to
+  Serial.begin(115200); //start communication with computer
+  led.initialize();
+  led.setStatus(led.YELLOW);  //yellow indicates power on and starting up
+  armed.initialize();
+  armed.setStatus(LED_ARMED); //green indicates that the system is currently armed
+  if(!xbee.initialize()){
+    led.setStatus(led.RED);
+    delay(5000);  }
+  else
+    led.setStatus(led.BLUE);  //blue indicates the xbee is functional, likely the most important component
+  actuator.initialize();
+  motor.initialize();
+  pinMode(ACT2_READ, INPUT_PULLUP);
+  if (digitalRead(ACT2_READ) == LOW){ //Only actuate on startup if the switch is set to do so.
+    valveIsOpen = actuator.openValve();
+    while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
+    valveIsOpen = actuator.closeValve();
+    while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
+    actuator.stopValve();
+    motor.startFan();
+    delay(2000);
+    motor.stopFan();
+  }
+  honeywell.initialize(&honeywellData[honeywell.TCA_INSIDE_SENSOR], &honeywellData[honeywell.TCA_OUTSIDE_SENSOR]);
+  if(!bme.initialize(&bmeData[bme.TCA_INSIDE_SENSOR], &bmeData[bme.TCA_OUTSIDE_SENSOR])){
+    led.setStatus(led.RED);
+    delay(5000);  }
+  if(!datalog.initialize()){
+    led.setStatus(led.RED);
+    delay(5000);  }
+  else
+    led.setStatus(led.WHITE);
+  if (!datalog.write("Header string goes here")){
+    led.setStatus(led.RED);
+    delay(5000);  }
+  if(!gps.initialize(&gpsData)){
+    led.setStatus(led.RED);
+    delay(5000);  }
+  for (int i=0; i<10; i++){
+    led.setStatus(led.OFF);
+    delay(500);
+    led.setStatus(led.GREEN);
+    delay(500);  }
 }
 
 void loop(){
@@ -113,7 +159,7 @@ void loop(){
     valveIsOpen = actuator.openValve();
     motor.startFan();
   }*/
-  bme.read(&bmeData[bme.TCA_INSIDE_SENSOR], bme.TCA_INSIDE_SENSOR);
+  /*bme.read(&bmeData[bme.TCA_INSIDE_SENSOR], bme.TCA_INSIDE_SENSOR);
   bme.read(&bmeData[bme.TCA_OUTSIDE_SENSOR], bme.TCA_OUTSIDE_SENSOR);
   Serial.print("Inside: ");
   Serial.print(bmeData[bme.TCA_INSIDE_SENSOR].pressure); Serial.print(", ");
@@ -126,12 +172,18 @@ void loop(){
   Serial.print(bmeData[bme.TCA_OUTSIDE_SENSOR].humidity); Serial.print(", ");
   Serial.println(bmeData[bme.TCA_OUTSIDE_SENSOR].altitude);
   delay(500);
-  //honeywell.read(&honeywellData[1], 1);
-  //Serial.print(honeywellData[1].pressure);
-  //Serial.print("   ");
-  //Serial.print(honeywellData[1].temperature);
-  //Serial.print("   ");
-  //Serial.println(honeywellData[1].el);
+  honeywell.read(&honeywellData[honeywell.TCA_INSIDE_SENSOR], honeywell.TCA_INSIDE_SENSOR);
+  Serial.print(honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure);
+  Serial.print("   ");
+  Serial.print(honeywellData[honeywell.TCA_INSIDE_SENSOR].temperature);
+  Serial.print("   ");
+  Serial.println(honeywellData[honeywell.TCA_INSIDE_SENSOR].el);
+  honeywell.read(&honeywellData[honeywell.TCA_OUTSIDE_SENSOR], honeywell.TCA_OUTSIDE_SENSOR);
+  Serial.print(honeywellData[honeywell.TCA_OUTSIDE_SENSOR].pressure);
+  Serial.print("   ");
+  Serial.print(honeywellData[honeywell.TCA_OUTSIDE_SENSOR].temperature);
+  Serial.print("   ");
+  Serial.println(honeywellData[honeywell.TCA_OUTSIDE_SENSOR].el);
   //delay(250);
   //datalog.write("the logger is working"); delay(2000);
   //gps.read(&gpsData);
@@ -168,6 +220,30 @@ void loop(){
   delay(5000);
   motor.stopFan();
   led.setStatus(led.GREEN);*/
+
+  //FOR THERMAL TEST
+  //stop actuator if it is moving and about to hit its endpoints
+  if (valveIsOpen && actuator.position() < actuator.START) //if valve has finished opening, turn it off
+    actuator.stopValve();
+  if (!valveIsOpen && actuator.position() > actuator.END) //if valve has finished closing, turn it off
+    actuator.stopValve();
+  
+  if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
+    xbeeCommand();  //exectue separate function that handles the command
+    command_timer = millis(); //set the time at which the last command was received to prevent duplicates
+  }
+
+  if (digitalRead(ACT2_READ) == LOW){ //Only actuate on startup if the switch is set to do so.
+    valveIsOpen = actuator.openValve();
+    motor.startFan();
+    while(actuator.position() > actuator.START); //wait for the valve to close, then turn it off
+    actuator.stopValve();
+    delay(10000);
+    valveIsOpen = actuator.closeValve();
+    while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
+    actuator.stopValve();
+    motor.stopFan();
+  }
 }
 
 #else //if we are not in debug mode, then run normal sequence

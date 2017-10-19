@@ -7,6 +7,7 @@
 
 #define HELIOS_DEBUG false
 #include "Arduino.h"
+#include "myPins.h"
 
 struct myHoneywellData{ //Preferred data structure for each sensor
   float pressure;
@@ -19,7 +20,6 @@ struct myHoneywellData{ //Preferred data structure for each sensor
 
 class myHoneywell{
   private:
-    //const static uint8_t TCAADDR 0x70;
     const static uint8_t SSC_ADDR = 0x28;         // Address of the sensor
     const static uint8_t MULTI_ADDR = 0x70;       // Address of the multiplexer
     const static uint16_t SSC_MIN = 0;            // Minimum value the sensor returns
@@ -27,6 +27,10 @@ class myHoneywell{
     const static float PRESSURE_MIN = 0.0;        // Min is 0 for sensors that give absolute values
     const static float PRESSURE_MAX = 206842.7;   // Max presure of the 30psi for this sensor converted to Pascals
 
+    const static uint8_t INSIDE_ADDR = TCA_HONEYWELL_INSIDE_ADDR;
+    const static uint8_t OUTSIDE_ADDR = TCA_HONEYWELL_OUTSIDE_ADDR;
+    const static uint8_t UNUSED_ADDR = TCA_UNUSED;
+    uint8_t getSensorLocation(uint8_t sensor_number);
     void selectSensor(uint8_t i);
 
   public:

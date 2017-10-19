@@ -54,6 +54,9 @@ void myBME::read(myBMEData *data, uint8_t sensor){
   data->temperature = bme[sensor].readTemperature();
   data->humidity = bme[sensor].readHumidity();
   data->altitude = bme[sensor].readAltitude(SEA_LEVEL_PRESSURE_HPA);
+  if(isnan(bme[sensor].readPressure())){ //if the bme was disconnected, try restarting it
+    bme[sensor].begin();
+  }
 }
 
 
