@@ -2,11 +2,11 @@ COMMAND HELIOS ENABLE BIG_ENDIAN "Helios Arm/Enable"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 0} %>
   
-  COMMAND HELIOS ALL_DATA BIG_ENDIAN "Helios Request Data"
+  COMMAND HELIOS REQ_DATA BIG_ENDIAN "Helios Request Data"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 1} %>
 
-COMMAND HELIOS REQ_DATA BIG_ENDIAN "Helios Request Full Data"
+COMMAND HELIOS ALL_DATA BIG_ENDIAN "Helios Request Full Data"
   <%= render "../../COMMON/cmd_tlm/_ccsds_pri_hdr_cmd.txt", locals: {apid: 800} %>
   <%= render "../../COMMON/cmd_tlm/_ccsds_sec_hdr_cmd.txt", locals: {fcncode: 17} %>
   
