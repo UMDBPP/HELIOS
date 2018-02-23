@@ -5,10 +5,8 @@
 #ifndef GPSFunctions
 #define GPSFunctions
 
-#define USING_GPS true
-
-#define HELIOS_DEBUG true
 #include "Arduino.h"
+#include "myPins.h"
 #include <Adafruit_GPS.h>
 
 //boolean usingInterrupt = false; 

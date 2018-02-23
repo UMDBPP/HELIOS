@@ -5,9 +5,9 @@
 #ifndef XbeeFunctions
 #define XbeeFunctions
 
-#define HELIOS_DEBUG true
 #include "Arduino.h"
 #include "ccsds_xbee.h"
+#include "myPins.h"
 
 #define _NO_RTC_
 #define PKT_MAX_LEN 100

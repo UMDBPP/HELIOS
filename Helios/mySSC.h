@@ -5,7 +5,6 @@
 #ifndef HoneywellFunctions
 #define HoneywellFunctions
 
-#define HELIOS_DEBUG false
 #include "Arduino.h"
 #include "myPins.h"
 

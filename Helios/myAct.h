@@ -4,7 +4,6 @@
 #ifndef ActuatorFunctions
 #define ActuatorFunctions
 
-#define HELIOS_DEBUG false
 #include "Arduino.h"
 #include "myPins.h"
 

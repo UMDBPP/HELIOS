@@ -1,8 +1,6 @@
 #ifndef BMEFunctions
 #define BMEFunctions
 
-#define HELIOS_DEBUG false
-
 #include "Arduino.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>

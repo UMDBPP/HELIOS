@@ -4,8 +4,8 @@
 #ifndef LEDFunctions
 #define LEDFunctions
 
-#define HELIOS_DEBUG false
 #include "Arduino.h"
+#include "myPins.h"
 
 class myLED{
   private:

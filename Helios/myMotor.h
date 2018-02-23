@@ -5,7 +5,6 @@
 #ifndef MotorFunctions
 #define MotorFunctions
 
-#define HELIOS_DEBUG true
 #include "Arduino.h"
 #include "myPins.h"
 

@@ -2,10 +2,7 @@
  * Code currently intended for Mega with custom shield
  * Should also work on Balloonduino with a few pin number changes
  */
-#define USING_GPS true //turning this false will tell the compiler to ignore anything involving the GPS, which is sometimes annoying during other tests
-  //don't forget that this must also be declared in the GPS library header file
-#define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well, this can be individually enabled/disabled for every file
-#define DEBUG_MODE true //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
+#define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
 
 //Import Custom Libraries
 #include "myPins.h" //defines pin numbers for use elsewhere
@@ -21,7 +18,9 @@
 #include<Wire.h>  //Required for I2C communication with SSC and BME sensors
 
 //First line printed identifies what each data column is
-/*#define HEADER_STRING "Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,
+#define HEADER_STRING "Header string goes here"
+
+/*"Starting:\nYear,Month,Day,Hour,Minute,Second,Millisecond,Latitude_deg,Latitude_min,Latitude_dir,Longitude_deg,Longitude_min,Longitude_dir,
     Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,
     Out_Temperature_Raw,valveHasOpened,Valve_Closed"
 */
@@ -77,8 +76,10 @@ myMotor motor;  //create a motor module
 #endif
 
 #define LED_ARMED armed.GREEN
-#define LED_DISARMED armed.OFF
-#define LED_OPEN armed.RED
+#define LED_DISARMED armed.RED
+#define LED_OPEN armed.YELLOW
+boolean statusLEDon = 0;
+char LEDStatusColor = led.YELLOW;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,7 +135,7 @@ void setup(){
     delay(5000);  }
   else
     led.setStatus(led.WHITE);
-  if (!datalog.write("Header string goes here")){
+  if (!datalog.write(HEADER_STRING)){
     led.setStatus(led.RED);
     delay(5000);  }
   if(!gps.initialize(&gpsData)){
@@ -143,7 +144,7 @@ void setup(){
   for (int i=0; i<10; i++){
     led.setStatus(led.OFF);
     delay(500);
-    led.setStatus(led.GREEN);
+    led.setStatus(LEDStatusColor);
     delay(500);  }
 }
 
@@ -227,7 +228,7 @@ void loop(){
     actuator.stopValve();
   if (!valveIsOpen && actuator.position() > actuator.END) //if valve has finished closing, turn it off
     actuator.stopValve();
-  
+
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     xbeeCommand();  //exectue separate function that handles the command
     command_timer = millis(); //set the time at which the last command was received to prevent duplicates
@@ -252,7 +253,7 @@ void loop(){
 void setup() {
 
   delay(5000); //wait to initialize so we can connect anything we might need to
-  
+
   Serial.begin(115200); //start communication with computer
 
   led.initialize();
@@ -266,9 +267,9 @@ void setup() {
   }
   else
     led.setStatus(led.BLUE);  //blue indicates the xbee is functional, likely the most important component
-  
+
   actuator.initialize();
-  
+
   motor.initialize();
 
   pinMode(ACT2_READ, INPUT_PULLUP);
@@ -279,7 +280,7 @@ void setup() {
     valveIsOpen = actuator.closeValve();
     while(actuator.position() < actuator.END); //wait for the valve to close, then turn it off
     actuator.stopValve();
-  
+
     //Turn fan on and off
     motor.startFan();
     delay(2000);
@@ -301,9 +302,9 @@ void setup() {
   }
   else
     led.setStatus(led.WHITE);
-  
+
   //Write header string on the SD card
-  if (!datalog.write("Header string goes here")){
+  if (!datalog.write(HEADER_STRING)){
     led.setStatus(led.RED);
     delay(5000);
   }
@@ -320,11 +321,11 @@ void setup() {
 #else
   gpsData = {};
 #endif
-  
+
   for (int i=0; i<10; i++){
     led.setStatus(led.OFF);
     delay(500);
-    led.setStatus(led.GREEN);
+    led.setStatus(LEDStatusColor);
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
   }
   if(HELIOS_DEBUG) Serial.println("Starting Main Loop");
@@ -337,32 +338,40 @@ void loop() {
     loopNum = millis()/1000;
     Serial.println(availableMemory());
   }*/
-  
+
 #if (USING_GPS)
   gps.read(&gpsData);
 #endif
 
   if (gpsData.fix)  //the led will turn off once the GPS has a fix
-    led.setStatus(led.OFF);
-    
+    LEDStatusColor = led.GREEN;
+
   //stop actuator if it is moving and about to hit its endpoints
   if (valveIsOpen && actuator.position() < actuator.START) //if valve has finished opening, turn it off
     actuator.stopValve();
   if (!valveIsOpen && actuator.position() > actuator.END) //if valve has finished closing, turn it off
     actuator.stopValve();
-  
+
   if(xbee.receive() && (millis() - command_timer) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     xbeeCommand();  //exectue separate function that handles the command
     command_timer = millis(); //set the time at which the last command was received to prevent duplicates
   }
-  
+
   //log data
   logged_now = false;
   if ((millis() - log_timer) > LOG_FREQUENCY){ //if it has been LOG_FREQUENCY milliseconds since last log
     logData();  //execute separate function to log data
     logged_now = true;
+    if (statusLEDon){
+      led.setStatus(led.OFF);
+      statusLEDon = 0;
+    }
+    else{
+      led.setStatus(LEDStatusColor);
+      statusLEDon = 1;
+    }
   }
-  
+
   //Opens the plunger and expells helium at ALTIDUDE_TO_OPEN meters for timeOpen seconds
   if(!valveAlreadyClosed){//if the valve has not already been opened and closed
     if(gpsData.altitude > altitudeToOpen && gpsData.altitude < maxAltitudeToOpen && logged_now){
@@ -453,7 +462,7 @@ void xbeeCommand(){
     // figure out the code required to reset a system
     xbee.sendConf(xbee.CONFIRM_CODE_KILL, 0);
   }else if (xbee.getLastCommand() == xbee.COMMAND_ALL_DATA){ //send long list of data
-    xbee.sendAllData(gpsData.altitude, gpsData.latitude_deg, gpsData.latitude_min, gpsData.longitude_deg, gpsData.longitude_min, ascentVelocity, honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure, 
+    xbee.sendAllData(gpsData.altitude, gpsData.latitude_deg, gpsData.latitude_min, gpsData.longitude_deg, gpsData.longitude_min, ascentVelocity, honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure,
         honeywellData[honeywell.TCA_OUTSIDE_SENSOR].pressure, honeywellData[honeywell.TCA_INSIDE_SENSOR].temperature, honeywellData[honeywell.TCA_OUTSIDE_SENSOR].temperature, actuator.position());
     if(HELIOS_DEBUG) Serial.println("xbee long data sent");
   }
@@ -472,33 +481,33 @@ void logData(){
     oldAltitude = gpsData.altitude;
     logsCounter = 0;
   }
-  
+
   log_timer = millis();
-  
+
   String dataString = "";
   dataString += (String)millis() + ",";
 
   dataString += (String)gpsData.year + ",";
-  dataString += (String)gpsData.month + ","; 
+  dataString += (String)gpsData.month + ",";
   dataString += (String)gpsData.day + ",";
   dataString += (String)gpsData.hour + ",";
   dataString += (String)gpsData.minute + ",";
   dataString += (String)gpsData.second + ",";
   dataString += (String)gpsData.millisecond + ",";
   dataString += (String)gpsData.fix + ",";
-  
+
   dataString += (String)gpsData.latitude_deg + ",";
   dataString += (String)gpsData.latitude_min + ",";
   dataString += (String)gpsData.latitude_dir + ",";
   dataString += (String)gpsData.longitude_deg + ",";
   dataString += (String)gpsData.longitude_min + ",";
   dataString += (String)gpsData.longitude_dir + ",";
-  
+
   dataString += (String)gpsData.velocity + ",";
   dataString += (String)gpsData.angle + ",";
   dataString += (String)gpsData.altitude + ",";
   dataString += (String)gpsData.satellites + ",";
-  
+
   dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].pressure + ",";
   dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].temperature + ",";
   dataString += (String)honeywellData[honeywell.TCA_INSIDE_SENSOR].status + ",";
@@ -512,7 +521,7 @@ void logData(){
   dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].rawPressure + ",";
   dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].rawTemperature + ",";
   dataString += (String)honeywellData[honeywell.TCA_OUTSIDE_SENSOR].el + ",";
-  
+
   dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].pressure + ",";
   dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].temperature + ",";
   dataString += (String)bmeData[bme.TCA_INSIDE_SENSOR].humidity + ",";
@@ -531,10 +540,10 @@ void logData(){
   dataString += (String)ascentVelocity + ",";
   dataString += (String)actuator.position() + ",";
   dataString += (String)valveIsOpen + ",";
-  
+
   dataString += (String)valveHasOpened + ",";
   dataString += (String)valveAlreadyClosed;
-  
+
   datalog.write(dataString);
 }
 

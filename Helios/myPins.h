@@ -1,5 +1,8 @@
 #include "Arduino.h"
 
+#define HELIOS_DEBUG true //this makes every function output what it is doing to serial as well, this can be individually enabled/disabled for every file
+#define USING_GPS true //turning this false will tell the compiler to ignore anything involving the GPS, which is sometimes annoying during other tests
+
 //these parameters correspond to the PCB print
 #define LED1_PINR 32
 #define LED1_PING 33
