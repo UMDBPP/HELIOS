@@ -28,7 +28,7 @@
 //Control Parameters
 int32_t altitudeToOpen = 18000; //meters  //the altitude at which to open - this can be changed only via an Xbee command
 int32_t maxAltitudeToOpen = 22000; //meters   //the max altitude at which to open - this is used to prevent from opening twice
-int32_t timeOpen = 60000; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
+int32_t timeOpen = 90000; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging sensor data
 #define ASCENT_CALC_FREQUENCY 10 //this is the number of times we will log data before we will recalculate the ascent velocity that will be sent to the xbee
@@ -75,8 +75,8 @@ myMotor motor;  //create a motor module
   myGPS gps;  //if using gps, create a GPS module
 #endif
 
-#define LED_ARMED armed.GREEN
-#define LED_DISARMED armed.RED
+#define LED_ARMED armed.RED
+#define LED_DISARMED armed.GREEN
 #define LED_OPEN armed.YELLOW
 boolean statusLEDon = 0;
 char LEDStatusColor = led.YELLOW;
@@ -109,10 +109,12 @@ void setup(){
   armed.initialize();
   armed.setStatus(LED_ARMED); //green indicates that the system is currently armed
   if(!xbee.initialize()){
-    led.setStatus(led.RED);
+    //led.setStatus(led.RED); //specific to NS-75 3/31/18
     delay(5000);  }
-  else
+  else{
     led.setStatus(led.BLUE);  //blue indicates the xbee is functional, likely the most important component
+    delay(2000);
+  }
   actuator.initialize();
   motor.initialize();
   pinMode(ACT2_READ, INPUT_PULLUP);
@@ -262,12 +264,13 @@ void setup() {
   armed.setStatus(LED_ARMED); //green indicates that the system is currently armed
 
   if(!xbee.initialize()){
-    led.setStatus(led.RED);
+    //led.setStatus(led.RED); //NS-75 only 3/31/2018
     delay(5000);
   }
-  else
+  else{
     led.setStatus(led.BLUE);  //blue indicates the xbee is functional, likely the most important component
-
+    delay(2000);
+  }
   actuator.initialize();
 
   motor.initialize();
@@ -300,9 +303,11 @@ void setup() {
     led.setStatus(led.RED);
     delay(5000);
   }
-  else
+  else{
     led.setStatus(led.WHITE);
-
+    delay(2000);
+  }
+  
   //Write header string on the SD card
   if (!datalog.write(HEADER_STRING)){
     led.setStatus(led.RED);
@@ -345,6 +350,8 @@ void loop() {
 
   if (gpsData.fix)  //the led will turn off once the GPS has a fix
     LEDStatusColor = led.GREEN;
+  else
+    LEDStatusColor = led.YELLOW;
 
   //stop actuator if it is moving and about to hit its endpoints
   if (valveIsOpen && actuator.position() < actuator.START) //if valve has finished opening, turn it off
@@ -379,7 +386,7 @@ void loop() {
       valveAltitudeCheckCounter++;//add to the altitude verifier
     }
     if(valveAltitudeCheckCounter >= NUM_OF_CHECKS_BEFORE_OPEN && !valveHasOpened){//if it is time to open the valve
-      actuator.openValve();//this causes a 3 second delay where no data is taken.
+      valveIsOpen = actuator.openValve();//this causes a 3 second delay where no data is taken.
       motor.startFan();
       valveTimeAtOpen = millis(); //set the time at open so we know when to close the valve
       valveHasOpened=1; //set that the valve has opened so that it can also be closed
