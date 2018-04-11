@@ -28,7 +28,7 @@
 //Control Parameters
 int32_t altitudeToOpen = 18000; //meters  //the altitude at which to open - this can be changed only via an Xbee command
 int32_t maxAltitudeToOpen = 22000; //meters   //the max altitude at which to open - this is used to prevent from opening twice
-int32_t timeOpen = 90000; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
+int32_t timeOpen = 300000; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging sensor data
 #define ASCENT_CALC_FREQUENCY 10 //this is the number of times we will log data before we will recalculate the ascent velocity that will be sent to the xbee
@@ -264,7 +264,7 @@ void setup() {
   armed.setStatus(LED_ARMED); //green indicates that the system is currently armed
 
   if(!xbee.initialize()){
-    //led.setStatus(led.RED); //NS-75 only 3/31/2018
+    //led.setStatus(led.RED);
     delay(5000);
   }
   else{
