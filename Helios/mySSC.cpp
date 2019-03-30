@@ -44,7 +44,10 @@ void myHoneywell::read(myHoneywellData *data, uint8_t sensor) {  //Read data fro
   float p, t;
   el = ps_get_raw(SSC_ADDR, &ps); //get data from sensor
   if ( el == 4 ) {  //if status == 4, then sensor missing
-    if(HELIOS_DEBUG) Serial.println("err sensor missing");
+    if(HELIOS_DEBUG){
+      Serial.print("Error. Honeywell sensor missing: ");
+      Serial.println(sensor);
+    }
   } else {
     if ( el == 3 ) {  //if status == 3, then error
       if(HELIOS_DEBUG) Serial.print("err diagnostic fault ");
