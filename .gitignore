@@ -15,6 +15,10 @@ local.properties
 .classpath
 .settings/
 .loadpath
+PCBShield/*.b#*
+PCBShield/*.s#*
+PCBShield/*.l#*
+PCBShield/*.job
 
 # External tool builders
 .externalToolBuilders/
