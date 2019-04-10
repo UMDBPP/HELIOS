@@ -1,7 +1,7 @@
 /*
  * Code currently intended for Mega with custom shield
  */
-#define DEBUG_MODE true //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
+#define DEBUG_MODE false //this makes the main code ignore the main setup and loop and instead follow an alternative code sequence
 
 //First line printed identifies what each data column is
 #define HEADER_STRING "Header string goes here"
@@ -11,7 +11,6 @@
     Velocity,Angle,Altitude,Num_Satellites,In_Pressure,In_Temperature,In_Status,In_Pressure_Raw,In_Temperature_Raw,Out_Pressure,Out_Temperature,Out_Status,Out_Pressure_Raw,
     Out_Temperature_Raw,valveHasOpened,Valve_Closed"
 */
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
