@@ -7,10 +7,32 @@ int myBITS::initialize(void){
 }
 
 bool myBITS::sendToGround(char* message, uint8_t length){
+	XBeeAddress64 TargetAddress = XBeeAddress64(UniSH,  BitsSL);
+	ZBTxRequest zbTx = ZBTxRequest(TargetAddress, (unit8_t*)message, length); //Assembles Packet to be sent
+	xbee.send(zbTx);              //Sends packet
+	  memset(xbeeSendBuf, 0, xbeeSendBufSize);
+  if (xbee.readPacket(500)) {                                       //Checks Reception, waits up to 500 ms
+    if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
+      xbee.getResponse().getZBTxStatusResponse(txStatus);
+      if (txStatus.getDeliveryStatus() == SUCCESS) {
+        //Serial.println("SuccessfulTransmit");
+        return true;
+      } else {
+        //Serial.println("TxFail");
+        return false;
+      }
+    }
+  } 
+    else if (xbee.getResponse().isError()) {
+    Serial.print("Error reading packet.  Error code: ");
+    Serial.println(xbee.getResponse().getErrorCode());
+  }
+  return false;
+}
   /**
    * This function will assign char* message to a packet, and send it to BITS to send to the ground
   */
-}
+
 
 int myBITS::checkForMessage(void){
   /**
