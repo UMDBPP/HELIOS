@@ -104,12 +104,32 @@ int myBITS::processMessage(void){
        return COMMAND_REQUEST_DATA;
     } else if (strstr(xbeeReceiveBuf, *PACKET_DROP_NOW)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn on nichrome now received.");
-      return COMMAND_REQUEST_DATA;
+      return COMMAND_DROP_NOW;
+    } else if (strstr(xbeeReceiveBuf, PACKET_VENT_NOW)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to turn on vent now received.");
+      return COMMAND_VENT_NOW;
+    } else if (strstr(xbeeReceiveBuf, PACKET_ABORT_VENT)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to turn off vent now received.");
+      return COMMAND_ABORT_VALVE;
+    } else if (strstr(xbeeReceiveBuf, PACKET_ABORT_DROP)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to turn off nichrome now received.");
+      return COMMAND_ABORT_DROP;
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_OPEN)){
+      if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to open.");
+      return COMMAND_TEST_OPEN;
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_CLOSE)){
+      if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to close.");
+      return COMMAND_TEST_CLOSE;
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_FWD)){
+      if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to spin forward.");
+      return COMMAND_TEST_FWD;
+    } else if (strstr(xbeeReceiveBuf, PACKET_ENABLE_VENT)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to enable vent now received.");
+      return COMMAND_ENABLE_VENT;
+    } else if (strstr(xbeeReceiveBuf, PACKET_ENABLE_DROP)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to enable nichrome now received.");
+      return COMMAND_ENABLE_DROP;
     }
-    /**
-     * Fill in the rest of the cases
-     */
-  }
 
   if (HELIOS_DEBUG) Serial.println("Unrecognized packet received.");
   return COMMAND_ERROR;
