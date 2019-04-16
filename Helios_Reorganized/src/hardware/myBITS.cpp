@@ -72,23 +72,29 @@ int myBITS::processMessage(void){
    * If it does not match any known command, it will return COMMAND_ERROR
   */
 
-  Serial.println("ReceiveFromBits: ");
-  Serial.write(xbeeReceiveBuf,xbeeReceiveBufSize);
-  
-  if(strstr((char*)xbeeReceiveBuf,"test")){ //Checks if "test" is within buffer
-      //Serial.println("");
-      //Serial.println("ackTest");
-      String("PacketAck").getBytes(xbeeSendBuf,xbeeSendBufSize);
-      //xbeeSend(BitsSL,xbeeSendBuf);
+  if (HELIOS_DEBUG){ //Print the data as received to the Serial monitor
+    Serial.print("ReceiveFromBits: ");
+    Serial.write(xbeeReceiveBuf,xbeeReceiveBufSize);
+    Serial.println("");
   }
-  if(strstr((char*)xbeeReceiveBuf,"TB")){ //Checks if "test" is within buffer
-      //Serial.println("");
-      //Serial.println("ToBits");
-      String("ToBitsAck").getBytes(xbeeSendBuf,xbeeSendBufSize);
-      //xbeeSend(BitsSL,xbeeSendBuf);
-  }  
 
-  return 0;
+  // See documentation for function "strstr". Note that the code "if (NULL)" returns false, while all other pointers return true, which is how this works.
+
+  if (strstr(xbeeReceiveBuf, "HELIOS")){ // Check if the packet was pre-prended with the phrase "HELIOS"
+    if (strstr(xbeeReceiveBuf, PACKET_REQUEST_DATA)){ //Check if the packet matches each command type
+       if (HELIOS_DEBUG) Serial.println("Request data packet received.");
+       return COMMAND_REQUEST_DATA;
+    } else if (strstr(xbeeReceiveBuf, PACKET_DROP_NOW)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to turn on nichrome now received.");
+      return COMMAND_REQUEST_DATA;
+    }
+    /**
+     * Fill in the rest of the cases
+     */
+  }
+
+  if (HELIOS_DEBUG) Serial.println("Unrecognized packet received.");
+  return COMMAND_ERROR;
 }
 
 
