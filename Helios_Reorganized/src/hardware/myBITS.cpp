@@ -3,6 +3,7 @@
 int myBITS::initialize(void){
     Xbee_Serial.begin(9600);
     xbee.setSerial(Xbee_Serial);
+    memcpy(xbeeSendBufFull, OFFSET, offsetSize);
     if (HELIOS_DEBUG) Serial.println("Xbee initialized");
 }
 

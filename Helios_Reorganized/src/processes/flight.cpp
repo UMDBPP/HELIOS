@@ -203,27 +203,30 @@ void xbeeCommand(){
     String str = "Confirm valve enable: " + (String)durationOpen + " ms at " + minAltitudeToOpen + " m altitude.";
     xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
     ledArmed.setStatus(LED_ARMED); //indicates that the system is rearmed
+    if (HELIOS_DEBUG) Serial.println("Xbee command venting enabled.");
   }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
     String str = "Altitude: " + (String)allData.gpsData.altitude + " m, Ascent Velocity: " + (String)ascentVelocity + " m/s";
     xbee.sendToGround(str);  //send the most recent calculated ascent velocity and altitude to the xbee
     if(HELIOS_DEBUG) Serial.println("Flight data sent via xbee");
-  }/*else if (xbee.getLastCommand() == xbee.COMMAND_ABORT){  //an abort command
+  }else if (xbee.getLastCommand() == xbee.COMMAND_ABORT_VALVE){  //an abort command
     valve.state = disarmed;
     motor.stopFan();  //stop the fan
     actuator.closeValve();  //close the valve
-    xbee.sendConf(xbee.CONFIRM_CODE_ABORT, 0);  //send a code confirming that the abort command was received
-    if(HELIOS_DEBUG) Serial.println("xbee has commanded abort");
+    String str = "Confirm Helios has aborted venting";
+    xbee.sendToGround(str);
     ledArmed.setStatus(LED_DISARMED);
+    if(HELIOS_DEBUG) Serial.println("xbee has commanded venting abort");
   }else if (xbee.getLastCommand() == xbee.COMMAND_VENT_NOW){  //an open valve now command
     valve.state = open;
     actuator.openValve(); //open the valve and start the fan
     motor.startFan();
-    durationOpen = xbee.getCommandedTime(); //reset the commanded time to be open
+    //durationOpen = xbee.getCommandedTime(); //reset the commanded time to be open
     valve.millisWhenOpened = millis(); //set the time at open so we know when to close it
-    xbee.sendConf(xbee.CONFIRM_CODE_VENT, durationOpen); //send confirmation code along with the commanded time
-    if (HELIOS_DEBUG) Serial.println("Helios will open valve for " + (String)durationOpen + " milliseconds");
+    String str = "Valve commanded open for " + (String) durationOpen + " ms.";
+    xbee.sendToGround(str);
     ledArmed.setStatus(LED_OPEN);
-  }else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){  //command to reset the amount of time to stay open
+    if (HELIOS_DEBUG) Serial.println("Helios will open valve for " + (String)durationOpen + " milliseconds");
+  }/*else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){  //command to reset the amount of time to stay open
     durationOpen = xbee.getCommandedTime();
     xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, durationOpen); //send confirmation message confirming the time received
   }else if (xbee.getLastCommand() == xbee.COMMAND_SET_ALT){ //command to change the altitude to stay open
@@ -238,29 +241,31 @@ void xbeeCommand(){
     xbee.sendConf(xbee.CONFIRM_CODE_REVERSE, durationOpen); //send confirmation code along with the amount of time commanded
     if(HELIOS_DEBUG) Serial.println("Helios will run fan in reverse for " + (String)durationOpen + " seconds");
     ledArmed.setStatus(LED_OPEN);
-  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){ //the next four commands are to control the payload without consideration of other code parameters
+  }*/
+  else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){ //the next four commands are to control the payload without consideration of other code parameters
     actuator.openValve();
     valve.state = open;
     // Fix this section so it stays open indefinitely
-    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_OPEN);
+    String str = "Confirmed valve manually opened.";
+    xbee.sendToGround(str);
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_CLOSE){
     actuator.closeValve();
     // Fix this section so it can close without becoming armed or disarmed
-    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_CLOSE);
+    xbee.sendToGround("Confirmed valve manually closed.");
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_FWD){
     motor.startFan();
-    xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_FWD);
-  }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
+    xbee.sendToGround("Confirmed fan turned on forward.");
+  }/*else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
     motor.reverseFan();
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV);
-  }else if (xbee.getLastCommand() == xbee.COMMAND_RESET){
+  }
+  else if (xbee.getLastCommand() == xbee.COMMAND_RESET){
     // figure out the code required to reset a system
-    xbee.sendConf(xbee.CONFIRM_CODE_KILL, 0);
+    xbee.sendToGround("This is null command. Please try again.");
   }else if (xbee.getLastCommand() == xbee.COMMAND_ALL_DATA){ //send long list of data
     xbee.sendAllData(allData.gpsData.altitude, allData.gpsData.latitude_deg, allData.gpsData.latitude_min, allData.gpsData.longitude_deg, allData.gpsData.longitude_min, ascentVelocity, allData.honeywellBalloonData.pressure,
         allData.honeywellAtmosphereData.pressure, allData.honeywellBalloonData.temperature, allData.honeywellAtmosphereData.temperature, actuator.position());
     if(HELIOS_DEBUG) Serial.println("xbee long data sent");
-  }
-  datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()) + ", " + (String)(xbee.getCommandedTime()));  //log whatever command was received to the datalog
-  */
+  }*/
+  datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()));  //log whatever command was received to the datalog
 }
