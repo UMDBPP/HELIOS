@@ -2,7 +2,7 @@
 
 myLED ledStat(LED1_PINR, LED1_PING, LED1_PINB); //create an LED object for status purposes
 myLED ledArmed(LED2_PINR, LED2_PING, LED2_PINB); //create an LED object to indicate if the system is armed
-myXbee xbee;  //create an Xbee object
+myBITS xbee;  //create an Xbee object
 myActuator actuator;  //create an Actuator object
 myDatalog datalog;  //create an SD Card logger object
 myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module

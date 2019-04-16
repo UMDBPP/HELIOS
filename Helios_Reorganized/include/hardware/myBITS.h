@@ -7,7 +7,7 @@
 
 #include "Arduino.h"
 #include "../../myPins.h"
-#include <Xbee.h>
+#include <XBee.h>
 
 class myBITS{
   private:
@@ -45,13 +45,18 @@ class myBITS{
     const static char PACKET_ENABLE_DROP[16]    = "HELIOS:PREP";
 
     int processMessage(void);
+    int lastCommand;
 
   public:
     int initialize();
 
+    bool sendToGround(String);
     bool sendToGround(char*,uint8_t); //sends a character array to ground
     int checkForMessage(void); //checks for messages and if so, calls processMessage
-    
+    int getLastCommand(void){return lastCommand;}
+
+    const static int WAIT_TIME_AFTER_COMMAND = 2000; //prevent duplicate commands. Note this is probably unnecessary.
+
     const static int COMMAND_REQUEST_DATA = 0;
     const static int COMMAND_ABORT_VALVE = 1;
     const static int COMMAND_ABORT_DROP = 2;
@@ -63,6 +68,7 @@ class myBITS{
     const static int COMMAND_TEST_CLOSE = 8;
     const static int COMMAND_TEST_FWD = 9;
     const static int COMMAND_ERROR = 10;
+    const static int NO_PACKET = 100;
 
 };
 

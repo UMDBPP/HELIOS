@@ -6,6 +6,19 @@ int myBITS::initialize(void){
     if (HELIOS_DEBUG) Serial.println("Xbee initialized");
 }
 
+bool myBITS::sendToGround(String message){
+  int length = message.length();
+  memset(xbeeSendBuf, 0, xbeeSendBufSize);
+  if (length <= xbeeSendBufSize){
+    message.toCharArray(xbeeSendBuf, length);
+    return sendToGround(xbeeSendBuf, length);
+  } else {
+    if (HELIOS_DEBUG) Serial.println("Warning: Message exceeds size that can be sent. Message trimmed.");
+    message.toCharArray(xbeeSendBuf, xbeeSendBufSize);
+    return sendToGround(xbeeSendBuf, xbeeReceiveBufSize);
+  }
+}
+
 bool myBITS::sendToGround(char* message, uint8_t length){
   /**
    * This function will assign char* message to a packet, and send it to BITS to send to the ground
@@ -13,7 +26,6 @@ bool myBITS::sendToGround(char* message, uint8_t length){
 	XBeeAddress64 TargetAddress = XBeeAddress64(UniSH,  BitsSL);
 	ZBTxRequest zbTx = ZBTxRequest(TargetAddress, message, length); //Assembles Packet to be sent
 	xbee.send(zbTx); //Sends packet
-  memset(xbeeSendBuf, 0, xbeeSendBufSize);
   if (xbee.readPacket(500)) {  //Checks Reception, waits up to 500 ms
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) { //If the response packet is of the type we're expecting
       xbee.getResponse().getZBTxStatusResponse(txStatus); //copy the status packet
@@ -58,11 +70,16 @@ int myBITS::checkForMessage(void){
       memset(xbeeReceiveBuf, 0, xbeeReceiveBufSize); // Clears old buffer
       memcpy(xbeeReceiveBuf,rx.getData(),rx.getPacketLength()); //copies packet to new buffer
       if(incominglsb == BitsSL){
-	      return processMessage();
+        lastCommand = processMessage();
+	      return lastCommand;
       }	
     }
+    lastCommand = COMMAND_ERROR;
+    return COMMAND_ERROR;
+  } else{
+    lastCommand = NO_PACKET;
+    return NO_PACKET;
   }
-  return COMMAND_ERROR;
 }
 
 int myBITS::processMessage(void){
@@ -81,10 +98,10 @@ int myBITS::processMessage(void){
   // See documentation for function "strstr". Note that the code "if (NULL)" returns false, while all other pointers return true, which is how this works.
 
   if (strstr(xbeeReceiveBuf, "HELIOS")){ // Check if the packet was pre-prended with the phrase "HELIOS"
-    if (strstr(xbeeReceiveBuf, PACKET_REQUEST_DATA)){ //Check if the packet matches each command type
+    if (strstr(xbeeReceiveBuf, *PACKET_REQUEST_DATA)){ //Check if the packet matches each command type
        if (HELIOS_DEBUG) Serial.println("Request data packet received.");
        return COMMAND_REQUEST_DATA;
-    } else if (strstr(xbeeReceiveBuf, PACKET_DROP_NOW)){
+    } else if (strstr(xbeeReceiveBuf, *PACKET_DROP_NOW)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn on nichrome now received.");
       return COMMAND_REQUEST_DATA;
     }

@@ -62,7 +62,7 @@ void lThermalTest(){
   else if (actuator.position() > actuator.END) //if valve has finished closing, turn it off
     actuator.stopValve();
 
-  if(xbee.receive() && (millis() - millisLast) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
+  if(xbee.checkForMessage() != xbee.NO_PACKET && (millis() - millisLast) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     //xbeeCommand();  //exectue separate function that handles the command
     millisLast = millis(); //set the time at which the last command was received to prevent duplicates
   }

@@ -29,7 +29,7 @@ boolean checkAltThisLoop = 0; //used to add in a delay for other functions, such
   //i.e. this will be false all the time except for during the first loop immediately after data is logged
 
 //For xbee command timing
-uint32_t millisLastCommandReceived= 0;  //keeps track of when the last command was received, commands received within myXbee.WAIT_TIME_AFTER_COMMAND will be ignored and assumed duplicates
+uint32_t millisLastCommandReceived= 0;  //keeps track of when the last command was received, commands received within myBITS.WAIT_TIME_AFTER_COMMAND will be ignored and assumed duplicates
 
 #define LED_ARMED ledArmed.RED
 #define LED_DISARMED ledArmed.GREEN
@@ -148,8 +148,8 @@ void lFlight() {
     else
       actuator.closeValve();
   }
-    
-  if(xbee.receive() && (millis() - millisLastCommandReceived) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
+  
+  if(xbee.checkForMessage() != xbee.NO_PACKET && (millis() - millisLastCommandReceived) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     xbeeCommand();  //exectue separate function that handles the command
     millisLastCommandReceived = millis(); //set the time at which the last command was received to prevent duplicates
   }
@@ -197,13 +197,14 @@ void lFlight() {
 
 
 void xbeeCommand(){
-  if (xbee.getLastCommand() == xbee.COMMAND_ENABLE){  //an enable command
+  if (xbee.getLastCommand() == xbee.COMMAND_ENABLE_VENT){
     valve.state = armed; //reset all control variables to false to allow the valve to reopen
     valve.numAltitudeChecks = 0;
-    xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, durationOpen);  //send confirmation codes that contain the time and altitude at which the valve will open
-    xbee.sendConf(xbee.CONFIRM_CODE_ENABLE, minAltitudeToOpen);
+    String str = "Confirm valve enable: " + (String)durationOpen + " ms at " + minAltitudeToOpen + " m altitude.";
+    xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
     ledArmed.setStatus(LED_ARMED); //indicates that the system is rearmed
-  }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
+  }/*else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
+    
     xbee.sendData(allData.gpsData.altitude, ascentVelocity);  //send the most recent calculated ascent velocity and altitude to the xbee
     if(HELIOS_DEBUG) Serial.println("xbee data sent");
   }
@@ -262,4 +263,5 @@ void xbeeCommand(){
     if(HELIOS_DEBUG) Serial.println("xbee long data sent");
   }
   datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()) + ", " + (String)(xbee.getCommandedTime()));  //log whatever command was received to the datalog
+  */
 }

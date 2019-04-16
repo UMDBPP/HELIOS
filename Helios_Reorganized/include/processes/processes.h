@@ -7,7 +7,7 @@
 #include "../hardware/mySSC.h"  //defines functions for interacting with Honeywell SSC Pressure sensors
 #include "../hardware/myLED.h"  //defines functions for changing LED color
 #include "../hardware/myMotor.h"  //defines functions for handling fan motor
-#include "../hardware/myXbee.h" //defines functions for interacting with xbees - note that this libary is just about communications, the actual command handling is at the end of this file
+#include "../hardware/myBITS.h" //defines functions for interacting with xbees - note that this libary is just about communications, the actual command handling is at the end of this file
 #include "../hardware/myAct.h"  //defines functions for extending and reading the actuator
 #include "../hardware/myLog.h"  //defines functions for interacting with SD card logging
 #include "../hardware/myBME.h"  //defines functions for working with BME280 pressure sensors
@@ -18,7 +18,7 @@
 //Create hardware objects
 extern myLED ledStat; //create an LED object for status purposes
 extern myLED ledArmed; //create an LED object to indicate if the system is armed
-extern myXbee xbee;  //create an Xbee object
+extern myBITS xbee;  //create an Xbee object
 extern myActuator actuator;  //create an Actuator object
 extern myDatalog datalog;  //create an SD Card logger object
 extern myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module
