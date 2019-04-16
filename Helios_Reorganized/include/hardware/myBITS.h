@@ -27,9 +27,9 @@ class myBITS{
     ZBTxStatusResponse txStatus; //the check on whether a transmitted packet was actually sent
     ZBRxResponse rx; //the received packet
 
-    const static int xbeeRecieveBufSize = 50; //Rec must be ~15bytes larger than send
+    const static int xbeeReceiveBufSize = 50; //Rec must be ~15bytes larger than send
     const static int xbeeSendBufSize = 35;
-    uint8_t xbeeReceiveBuf[xbeeRecieveBufSize];
+    uint8_t xbeeReceiveBuf[xbeeReceiveBufSize];
     uint8_t xbeeSendBuf[xbeeSendBufSize];
 
     // These are intentionally rather different strings to make it hard for human error to mistype something
