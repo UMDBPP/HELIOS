@@ -203,12 +203,11 @@ void xbeeCommand(){
     String str = "Confirm valve enable: " + (String)durationOpen + " ms at " + minAltitudeToOpen + " m altitude.";
     xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
     ledArmed.setStatus(LED_ARMED); //indicates that the system is rearmed
-  }/*else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
-    
-    xbee.sendData(allData.gpsData.altitude, ascentVelocity);  //send the most recent calculated ascent velocity and altitude to the xbee
-    if(HELIOS_DEBUG) Serial.println("xbee data sent");
-  }
-  else if (xbee.getLastCommand() == xbee.COMMAND_ABORT){  //an abort command
+  }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
+    String str = "Altitude: " + (String)allData.gpsData.altitude + " m, Ascent Velocity: " + (String)ascentVelocity + " m/s";
+    xbee.sendToGround(str);  //send the most recent calculated ascent velocity and altitude to the xbee
+    if(HELIOS_DEBUG) Serial.println("Flight data sent via xbee");
+  }/*else if (xbee.getLastCommand() == xbee.COMMAND_ABORT){  //an abort command
     valve.state = disarmed;
     motor.stopFan();  //stop the fan
     actuator.closeValve();  //close the valve
