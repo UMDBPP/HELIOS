@@ -2,7 +2,7 @@
 
 #define PRESET_ALTITUDE_MIN 18000
 #define PRESET_ALTITUDE_MAX 22000
-#define PRESET_DURATION_OPEN 5*60*1000 // 5 minutes
+#define PRESET_DURATION_OPEN 5.0*60*1000 // 5 minutes
 
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging sensor data
@@ -31,8 +31,8 @@ boolean checkAltThisLoop = 0; //used to add in a delay for other functions, such
 //For xbee command timing
 uint32_t millisLastCommandReceived= 0;  //keeps track of when the last command was received, commands received within myBITS.WAIT_TIME_AFTER_COMMAND will be ignored and assumed duplicates
 
-#define LED_ARMED ledArmed.RED
-#define LED_DISARMED ledArmed.GREEN
+#define LED_ARMED ledArmed.GREEN
+#define LED_DISARMED ledArmed.RED
 #define LED_OPEN ledArmed.YELLOW
 #define LED_NO_FIX ledStat.YELLOW
 #define LED_YES_FIX ledStat.GREEN
@@ -43,14 +43,14 @@ void sFlight() {
   delay(5000); //wait to initialize so we can connect anything we might need to
 
   Serial.begin(115200); //start communication with computer
-
+  Serial.println(durationOpen);
   ledStat.initialize();
   ledStat.setStatus(ledStat.YELLOW);  //yellow indicates power on and starting up
   ledArmed.initialize();
   ledArmed.setStatus(LED_ARMED); //green indicates that the system is currently armed
 
   if(!xbee.initialize()){
-    ledStat.setStatus(ledStat.RED);
+    ledStat.setStatus(ledStat.CYAN);
     delay(5000);
   }
   else{
@@ -77,12 +77,12 @@ void sFlight() {
   }
   valve.state = armed;
 
-  honeywell.initialize(allData.honeywellBalloonData, allData.honeywellAtmosphereData);
+  /*honeywell.initialize(allData.honeywellBalloonData, allData.honeywellAtmosphereData);
 
   if(!bme.initialize(allData.bmeBalloonData, allData.bmeAtmosphereData)){
     ledStat.setStatus(ledStat.RED);
     delay(5000);
-  }
+  }*/
 
   //implement something to check that all the pressure sensors are recording the correct data
 
@@ -114,12 +114,12 @@ void sFlight() {
   allData.gpsData = {};
 #endif
 
-  for (int i=0; i<10; i++){
+  /*for (int i=0; i<10; i++){
     ledStat.setStatus(ledStat.OFF);
     delay(500);
     ledStat.setStatus(LEDStatusColor);
     delay(500); //led blinks green to confirm it has finished setup successfully; led will turn off once there is a gps fix
-  }
+  }*/
   if(HELIOS_DEBUG) Serial.println("Starting Main Loop");
 }
 
@@ -157,10 +157,10 @@ void lFlight() {
   //log data
   checkAltThisLoop = false;
   if ((millis() - millisLastLog) > LOG_FREQUENCY){ //if it has been LOG_FREQUENCY milliseconds since last log
-    honeywell.read(&allData.honeywellBalloonData, honeywell.INDEX_BALLOON);
-    honeywell.read(&allData.honeywellAtmosphereData, honeywell.INDEX_ATMOS);
-    bme.read(&allData.bmeBalloonData, bme.INDEX_BALLOON);
-    bme.read(&allData.bmeAtmosphereData, bme.INDEX_ATMOS);
+    //honeywell.read(&allData.honeywellBalloonData, honeywell.INDEX_BALLOON);
+    //honeywell.read(&allData.honeywellAtmosphereData, honeywell.INDEX_ATMOS);
+    //bme.read(&allData.bmeBalloonData, bme.INDEX_BALLOON);
+    //bme.read(&allData.bmeAtmosphereData, bme.INDEX_ATMOS);
     millisLastLog = millis();
     logData(datalog, allData, valve, actuator.position());  //execute separate function to log data
     checkAltThisLoop = true;
@@ -222,6 +222,7 @@ void xbeeCommand(){
     motor.startFan();
     //durationOpen = xbee.getCommandedTime(); //reset the commanded time to be open
     valve.millisWhenOpened = millis(); //set the time at open so we know when to close it
+    Serial.println(durationOpen);
     String str = "Valve commanded open for " + (String) durationOpen + " ms.";
     xbee.sendToGround(str);
     ledArmed.setStatus(LED_OPEN);

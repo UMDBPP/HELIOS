@@ -33,6 +33,7 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   dataString += (String)allData.gpsData.altitude + ",";
   dataString += (String)allData.gpsData.satellites + ",";
 
+  /*
   dataString += (String)allData.honeywellBalloonData.pressure + ",";
   dataString += (String)allData.honeywellBalloonData.temperature + ",";
   dataString += (String)allData.honeywellBalloonData.status + ",";
@@ -56,7 +57,8 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   dataString += (String)allData.bmeAtmosphereData.temperature + ",";
   dataString += (String)allData.bmeAtmosphereData.humidity + ",";
   dataString += (String)allData.bmeAtmosphereData.altitude + ",";
-
+  */
+ 
   /*dataString += (String)bmeData[bme.TCA_BOX_SENSOR].pressure + ",";
   dataString += (String)bmeData[bme.TCA_BOX_SENSOR].temperature + ",";
   dataString += (String)bmeData[bme.TCA_BOX_SENSOR].humidity + ",";

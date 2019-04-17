@@ -1,3 +1,4 @@
+/*
 #include "../../include/hardware/myXbee.h"
 
 boolean myXbee::packet_processing(uint8_t Pkt_Buff[]){
@@ -190,3 +191,4 @@ boolean myXbee::receive(){  //function to check continuously if the xbee receive
     return packet_processing(Pkt_Buff); //if the data looks good, we'll actually look at the content
   }
 }
+*/

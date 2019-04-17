@@ -19,7 +19,7 @@ int myDatalog::write(String str){ //write to the SD card and return false is som
   File dataFile = SD.open("Datalog.txt", FILE_WRITE);
   if (dataFile) {// if the file is available, write to it:
     dataFile.println(str);
-    if (HELIOS_DEBUG) Serial.println(str);
+    //if (HELIOS_DEBUG) Serial.println(str);
     dataFile.close();
     return 1;
   }

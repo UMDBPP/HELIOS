@@ -1,10 +1,22 @@
 #include "../../include/hardware/myBITS.h"
 
+const char myBITS::PACKET_REQUEST_DATA[myBITS::commandLength]   = "HELIOS:DATA";
+const char myBITS::PACKET_DROP_NOW[myBITS::commandLength]       = "HELIOS:DROP";
+const char myBITS::PACKET_VENT_NOW[myBITS::commandLength]       = "HELIOS:VENT";
+const char myBITS::PACKET_ABORT_VENT[myBITS::commandLength]     = "HELIOS:ABORT";
+const char myBITS::PACKET_ABORT_DROP[myBITS::commandLength]     = "HELIOS:RISE";
+const char myBITS::PACKET_TEST_OPEN[myBITS::commandLength]      = "HELIOS:OPEN";
+const char myBITS::PACKET_TEST_CLOSE[myBITS::commandLength]     = "HELIOS:CLOSE";
+const char myBITS::PACKET_TEST_FWD[myBITS::commandLength]       = "HELIOS:FWD";
+const char myBITS::PACKET_ENABLE_VENT[myBITS::commandLength]    = "HELIOS:ARM";
+const char myBITS::PACKET_ENABLE_DROP[myBITS::commandLength]    = "HELIOS:PREP";
+
 int myBITS::initialize(void){
     Xbee_Serial.begin(9600);
     xbee.setSerial(Xbee_Serial);
     memcpy(xbeeSendBufFull, OFFSET, offsetSize);
     if (HELIOS_DEBUG) Serial.println("Xbee initialized");
+    return sendToGround("Helios is on.");
 }
 
 bool myBITS::sendToGround(String message){
@@ -15,8 +27,9 @@ bool myBITS::sendToGround(String message){
     return sendToGround(xbeeSendBuf, length);
   } else {
     if (HELIOS_DEBUG) Serial.println("Warning: Message exceeds size that can be sent. Message trimmed.");
-    message.toCharArray(xbeeSendBuf, xbeeSendBufSize);
-    return sendToGround(xbeeSendBuf, xbeeReceiveBufSize);
+    message.toCharArray(xbeeSendBuf, xbeeSendBufSize-1);
+    xbeeSendBuf[xbeeSendBufSize-1] = '\0';
+    return sendToGround(xbeeSendBuf, xbeeSendBufSize);
   }
 }
 
@@ -43,6 +56,8 @@ bool myBITS::sendToGround(char* message, uint8_t length){
       Serial.print("Error reading status return packet. Error code: ");
       Serial.println(xbee.getResponse().getErrorCode());
     }
+  } else {
+    if (HELIOS_DEBUG) Serial.println("Message sent. No response from BITS.");
   }
   return false; //failure
 }
@@ -52,6 +67,7 @@ int myBITS::checkForMessage(void){
    * This function should check the xbee for a message, and assign it to a char* or uint8_t* array.
    * If there is a message, it will call processMessage and return its output
   */  
+ 
   xbee.readPacket(); //read buffer, does not wait
   if (xbee.getResponse().isAvailable()) { //if a packet arrive
     if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) { //if the packet is of the type we're looking for
@@ -97,36 +113,35 @@ int myBITS::processMessage(void){
   }
 
   // See documentation for function "strstr". Note that the code "if (NULL)" returns false, while all other pointers return true, which is how this works.
-
   if (strstr(xbeeReceiveBuf, "HELIOS")){ // Check if the packet was pre-prended with the phrase "HELIOS"
-    if (strstr(xbeeReceiveBuf, *PACKET_REQUEST_DATA)){ //Check if the packet matches each command type
+    if (strstr(xbeeReceiveBuf, PACKET_REQUEST_DATA)){ //Check if the packet matches each command type
        if (HELIOS_DEBUG) Serial.println("Request data packet received.");
        return COMMAND_REQUEST_DATA;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_DROP_NOW)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_DROP_NOW)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn on nichrome now received.");
       return COMMAND_DROP_NOW;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_VENT_NOW)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_VENT_NOW)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn on vent now received.");
       return COMMAND_VENT_NOW;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_ABORT_VENT)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_ABORT_VENT)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn off vent now received.");
       return COMMAND_ABORT_VALVE;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_ABORT_DROP)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_ABORT_DROP)){
       if (HELIOS_DEBUG) Serial.println("Command packet to turn off nichrome now received.");
       return COMMAND_ABORT_DROP;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_TEST_OPEN)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_OPEN)){
       if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to open.");
       return COMMAND_TEST_OPEN;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_TEST_CLOSE)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_CLOSE)){
       if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to close.");
       return COMMAND_TEST_CLOSE;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_TEST_FWD)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_FWD)){
       if (HELIOS_DEBUG) Serial.println("Manual Test: Valve commanded to spin forward.");
       return COMMAND_TEST_FWD;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_ENABLE_VENT)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_ENABLE_VENT)){
       if (HELIOS_DEBUG) Serial.println("Command packet to enable vent now received.");
       return COMMAND_ENABLE_VENT;
-    } else if (strstr(xbeeReceiveBuf, *PACKET_ENABLE_DROP)){
+    } else if (strstr(xbeeReceiveBuf, PACKET_ENABLE_DROP)){
       if (HELIOS_DEBUG) Serial.println("Command packet to enable nichrome now received.");
       return COMMAND_ENABLE_DROP;
     }

@@ -1,19 +1,19 @@
 #include "../../include/processes/processes.h"
 
 void sBench(void){
-  delay(5000); //wait to initialize so we can connect anything we might need to
+  delay(500); //wait to initialize so we can connect anything we might need to
 
   Serial.begin(115200); //start communication with computer
   Serial.println("I am starting");
   ledStat.initialize();
   ledStat.setStatus(ledStat.YELLOW);  //yellow indicates power on and starting up
-  delay(5e3);
+
   ledArmed.initialize();
   ledArmed.setStatus(ledStat.GREEN); //green indicates that the system is currently armed
   delay(5e3);
 
   if(!xbee.initialize()){
-    ledStat.setStatus(ledStat.RED);
+    ledStat.setStatus(ledStat.CYAN);
     delay(5000);
   }
   else{
@@ -38,8 +38,7 @@ void sBench(void){
     //delay(2000);
     motor.stopFan();
   }
-  while(1);
-
+  
 /*
   valve.state = armed;
 

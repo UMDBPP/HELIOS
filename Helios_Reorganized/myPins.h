@@ -46,3 +46,4 @@
 
 #define GPS_Serial Serial2
 #define Xbee_Serial Serial3
+//#include <SoftwareSerial.h>
