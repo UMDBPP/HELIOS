@@ -12,6 +12,7 @@ struct valveState{
   State state; //becomes true as soon as the valve first opens, becomes false after a re-enable command
 };
 extern valveState valve;
+extern valveState cutdown;
 
 //Create data objects
 

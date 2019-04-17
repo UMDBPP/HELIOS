@@ -1,6 +1,6 @@
 #include "../../include/processes/functions.h"
 
-void logData(const myDatalog &datalog, const myData &allData, const valveState &valve, const float &actPosition){
+void logData(const myDatalog &datalog, const myData &allData, const valveState &valve, const valveState &cutdown, const float &actPosition){
   /*logsCounter++;
   if (logsCounter == ASCENT_CALC_FREQUENCY){ //send data less frequently to the trinket
     ascentVelocity = 1.0*(allData.gpsData.altitude - oldAltitude)/(millis() - oldTime);
@@ -68,6 +68,8 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   dataString += (String)actPosition + ",";
   dataString += (String)valve.state + ",";
   dataString += (String)valve.numAltitudeChecks;
+  dataString += (String)cutdown.state + ",";
+  dataString += (String)cutdown.numAltitudeChecks;
 
   datalog.write(dataString);
 }

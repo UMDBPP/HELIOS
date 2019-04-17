@@ -11,6 +11,7 @@
 #include "../hardware/myAct.h"  //defines functions for extending and reading the actuator
 #include "../hardware/myLog.h"  //defines functions for interacting with SD card logging
 #include "../hardware/myBME.h"  //defines functions for working with BME280 pressure sensors
+#include "../hardware/myNichrome.h"
 #include "data.h"
 #include "functions.h"
 //#include <Wire.h>  //Required for I2C communication with SSC and BME sensors
@@ -20,6 +21,7 @@ extern myLED ledStat; //create an LED object for status purposes
 extern myLED ledArmed; //create an LED object to indicate if the system is armed
 extern myBITS xbee;  //create an Xbee object
 extern myActuator actuator;  //create an Actuator object
+extern myNichrome nichrome;
 extern myDatalog datalog;  //create an SD Card logger object
 extern myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module
 extern myBME bme; //create a BME280 sensor object to manage the BMEs

@@ -2,8 +2,13 @@
 
 #define PRESET_ALTITUDE_MIN 18000
 #define PRESET_ALTITUDE_MAX 22000
-#define PRESET_DURATION_OPEN 5.0*60*1000 // 5 minutes
+#define PRESET_DURATION_OPEN 3.0*60*1000 // 3 minutes
 
+#define PRESET_ALTITUDE_MIN_DROP 24380
+#define PRESET_ALTITUDE_MAX_DROP 37000
+#define PRESET_DURATION_HEAT 4.0*60*1000
+
+#define NUM_OF_CHECKS_BEFORE_DROP 40
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
 #define LOG_FREQUENCY 500 //time in milliseconds between logging sensor data
 #define ASCENT_CALC_FREQUENCY 10 //this is the number of times we will log data before we will recalculate the ascent velocity that will be sent to the xbee
@@ -16,6 +21,9 @@ void xbeeCommand(void);
 int32_t minAltitudeToOpen = PRESET_ALTITUDE_MIN; //meters  //the altitude at which to open - this can be changed only via an Xbee command
 int32_t maxAltitudeToOpen = PRESET_ALTITUDE_MAX; //meters   //the max altitude at which to open - this is used to prevent from opening twice
 int32_t durationOpen = PRESET_DURATION_OPEN; //milliseconds  //the amount of time to stay open - this can be changed only via an Xbee command
+int32_t minAltitudeToDrop = PRESET_ALTITUDE_MIN_DROP;
+int32_t maxAltitudeToDrop = PRESET_ALTITUDE_MAX_DROP;
+int32_t durationHeated = PRESET_DURATION_HEAT;
 
 //For ascent velocity calculation
 float ascentVelocity = 0.0; //this persistent value is updated every ASCENT_VELOCITY_CALC loops, and is sent via xbee whenever requested
@@ -40,10 +48,9 @@ boolean statusLEDon = false;
 char LEDStatusColor = LED_NO_FIX;
 
 void sFlight() {
-  delay(5000); //wait to initialize so we can connect anything we might need to
+  delay(1000); //wait to initialize so we can connect anything we might need to
 
   Serial.begin(115200); //start communication with computer
-  Serial.println(durationOpen);
   ledStat.initialize();
   ledStat.setStatus(ledStat.YELLOW);  //yellow indicates power on and starting up
   ledArmed.initialize();
@@ -58,6 +65,7 @@ void sFlight() {
     delay(2000);
   }
 
+  nichrome.initialize();
   actuator.initialize();
   motor.initialize();
 
@@ -76,6 +84,7 @@ void sFlight() {
     motor.stopFan();
   }
   valve.state = armed;
+  cutdown.state = armed;
 
   /*honeywell.initialize(allData.honeywellBalloonData, allData.honeywellAtmosphereData);
 
@@ -148,6 +157,11 @@ void lFlight() {
     else
       actuator.closeValve();
   }
+  if (cutdown.state==open){
+    nichrome.startHeat();
+  } else {
+    nichrome.endHeat();
+  }
   
   if(xbee.checkForMessage() != xbee.NO_PACKET && (millis() - millisLastCommandReceived) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     xbeeCommand();  //exectue separate function that handles the command
@@ -162,7 +176,7 @@ void lFlight() {
     //bme.read(&allData.bmeBalloonData, bme.INDEX_BALLOON);
     //bme.read(&allData.bmeAtmosphereData, bme.INDEX_ATMOS);
     millisLastLog = millis();
-    logData(datalog, allData, valve, actuator.position());  //execute separate function to log data
+    logData(datalog, allData, valve, cutdown, actuator.position());  //execute separate function to log data
     checkAltThisLoop = true;
     if (statusLEDon){
       ledStat.setStatus(ledStat.OFF);
@@ -192,7 +206,19 @@ void lFlight() {
       ledArmed.setStatus(LED_DISARMED); //off means that the system is no longer armed
     }
   }
-  //Serial.println("Loop A");
+
+  if(cutdown.state != disarmed){
+    if(allData.gpsData.altitude > minAltitudeToDrop && allData.gpsData.altitude < maxAltitudeToDrop && checkAltThisLoop){
+      cutdown.numAltitudeChecks++;
+    }
+    if(cutdown.numAltitudeChecks >= NUM_OF_CHECKS_BEFORE_DROP && cutdown.state == armed){
+      cutdown.state = open;
+      cutdown.millisWhenOpened = millis();
+    }
+    else if(cutdown.state == open && millis() > (cutdown.millisWhenOpened + durationHeated)){
+      cutdown.state = disarmed;
+    }
+  }
 }
 
 
