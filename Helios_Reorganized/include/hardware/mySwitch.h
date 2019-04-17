@@ -17,6 +17,7 @@ class mySwitch{
     void initialize(void);
     int getStatus(void);
     unsigned long timerStartTime(void);
+    unsigned long timerOtherTime(void); //not yet sure what this would be used for
     void checkStatus(void);
 };
 

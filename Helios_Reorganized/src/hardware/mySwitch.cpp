@@ -18,6 +18,10 @@ unsigned long mySwitch::timerStartTime(void){
   return timeFlippedOn;
 }
 
+unsigned long mySwitch::timerOtherTime(void){
+  return timeFlippedOff;
+}
+
 void mySwitch::checkStatus(void){
   int newState = digitalRead(pin);
   if (newState != lastState){
