@@ -10,7 +10,7 @@ void mySwitch::initialize(void){
 }
 
 int mySwitch::getStatus(void){
-  lastState = digitalRead(pin);
+  checkStatus();
   return lastState;
 }
 
