@@ -12,6 +12,7 @@
 #include "../hardware/myLog.h"  //defines functions for interacting with SD card logging
 #include "../hardware/myBME.h"  //defines functions for working with BME280 pressure sensors
 #include "../hardware/myNichrome.h"
+#include "../hardware/mySwitch.h"
 #include "data.h"
 #include "functions.h"
 //#include <Wire.h>  //Required for I2C communication with SSC and BME sensors
@@ -26,6 +27,7 @@ extern myDatalog datalog;  //create an SD Card logger object
 extern myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module
 extern myBME bme; //create a BME280 sensor object to manage the BMEs
 extern myMotor motor;  //create a motor module
+extern mySwitch extSwitch;
 #if (USING_GPS) //The GPS is often troublesome, so we nest this inside an if statement so it can be readily removed for other testing
   extern myGPS gps;  //if using gps, create a GPS module
 #endif

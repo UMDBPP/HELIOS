@@ -30,7 +30,7 @@
 #define SWITCH1 38
 #define SWITCH2 39
 
-#define NICHROME_PIN 16
+#define NICHROME_PIN 18
 
 #define NC A2 //this is a pin which should remain unconnected because it will be used as a placeholder
 

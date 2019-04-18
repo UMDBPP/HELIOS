@@ -5,6 +5,7 @@ myLED ledArmed(LED2_PINR, LED2_PING, LED2_PINB); //create an LED object to indic
 myBITS xbee;  //create an Xbee object
 myActuator actuator;  //create an Actuator object
 myNichrome nichrome; //create a Nichrome wire object
+mySwitch extSwitch(ACT2_READ);
 myDatalog datalog;  //create an SD Card logger object
 myHoneywell honeywell;  //create a honeywell SSC sensor and multiplexer module
 myBME bme; //create a BME280 sensor object to manage the BMEs
