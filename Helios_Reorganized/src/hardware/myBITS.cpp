@@ -10,6 +10,7 @@ const char myBITS::PACKET_TEST_CLOSE[myBITS::commandLength]     = "HELIOS:CLOSE"
 const char myBITS::PACKET_TEST_FWD[myBITS::commandLength]       = "HELIOS:FWD";
 const char myBITS::PACKET_ENABLE_VENT[myBITS::commandLength]    = "HELIOS:ARM";
 const char myBITS::PACKET_ENABLE_DROP[myBITS::commandLength]    = "HELIOS:PREP";
+const char myBITS::PACKET_TEST_HEAT[myBITS::commandLength]      = "HELIOS:HEAT";
 
 int myBITS::initialize(void){
     Xbee_Serial.begin(9600);
@@ -144,6 +145,9 @@ int myBITS::processMessage(void){
     } else if (strstr(xbeeReceiveBuf, PACKET_ENABLE_DROP)){
       if (HELIOS_DEBUG) Serial.println("Command packet to enable nichrome now received.");
       return COMMAND_ENABLE_DROP;
+    } else if (strstr(xbeeReceiveBuf, PACKET_TEST_HEAT)){
+      if (HELIOS_DEBUG) Serial.println("Command packet to test nichrome now received.");
+      return COMMAND_TEST_HEAT;
     }
   }
 

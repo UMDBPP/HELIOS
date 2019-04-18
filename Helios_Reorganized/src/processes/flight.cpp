@@ -81,8 +81,8 @@ void sFlight() {
 
     //Turn fan on and off
     /*motor.startFan();
-    delay(2000);
-    motor.stopFan();*/
+    delay(2000);*/
+    motor.stopFan();
   }
   valve.state = armed;
   cutdown.state = armed;
@@ -158,6 +158,8 @@ void lFlight() {
     else
       actuator.closeValve();
   }
+
+  //turn on/off the nichrome based on what we think it should do
   if (cutdown.state==open){
     nichrome.startHeat();
   } else {
@@ -197,13 +199,13 @@ void lFlight() {
     }
     if(valve.numAltitudeChecks >= NUM_OF_CHECKS_BEFORE_OPEN && valve.state == armed){//if it is time to open the valve
       valve.state = open; //it won't actually open until the start of the next loop
-      motor.startFan();
+      //motor.startFan();
       valve.millisWhenOpened = millis(); //set the time at open so we know when to close the valve
       ledArmed.setStatus(LED_OPEN); //red means that the valve is currently open
     }
     else if(valve.state == open && millis() > (valve.millisWhenOpened + durationOpen)){//if we've been open long enough
       valve.state = disarmed;
-      motor.stopFan();  //stop the fan and close the valve
+      //motor.stopFan();  //stop the fan and close the valve
       ledArmed.setStatus(LED_DISARMED); //off means that the system is no longer armed
     }
   }
@@ -228,36 +230,53 @@ void lFlight() {
 
 
 void xbeeCommand(){
-  if (xbee.getLastCommand() == xbee.COMMAND_ENABLE_VENT){
-    valve.state = armed; //reset all control variables to false to allow the valve to reopen
-    valve.numAltitudeChecks = 0;
-    String str = "Confirm valve enable: " + (String)durationOpen + " ms at " + minAltitudeToOpen + " m altitude.";
-    xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
-    ledArmed.setStatus(LED_ARMED); //indicates that the system is rearmed
-    if (HELIOS_DEBUG) Serial.println("Xbee command venting enabled.");
-  }else if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
-    String str = "Altitude: " + (String)allData.gpsData.altitude + " m, Ascent Velocity: " + (String)ascentVelocity + " m/s";
+  if(xbee.getLastCommand() == xbee.COMMAND_REQUEST_DATA){ //request data command
+    String str = "Alt: " + (String)allData.gpsData.altitude + " m, Asc-Vel: " + (String)ascentVelocity + " m/s";
     xbee.sendToGround(str);  //send the most recent calculated ascent velocity and altitude to the xbee
     if(HELIOS_DEBUG) Serial.println("Flight data sent via xbee");
   }else if (xbee.getLastCommand() == xbee.COMMAND_ABORT_VALVE){  //an abort command
     valve.state = disarmed;
     motor.stopFan();  //stop the fan
     actuator.closeValve();  //close the valve
-    String str = "Confirm Helios has aborted venting";
+    String str = "Confirm Helios aborted venting";
     xbee.sendToGround(str);
     ledArmed.setStatus(LED_DISARMED);
     if(HELIOS_DEBUG) Serial.println("xbee has commanded venting abort");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_ABORT_DROP){
+    cutdown.state = disarmed;
+    nichrome.endHeat();
+    xbee.sendToGround("Confirm Helios aborted drop");
+    if(HELIOS_DEBUG) Serial.println("xbee has commanded drop abort");
   }else if (xbee.getLastCommand() == xbee.COMMAND_VENT_NOW){  //an open valve now command
     valve.state = open;
     actuator.openValve(); //open the valve and start the fan
-    motor.startFan();
+    //motor.startFan();
     //durationOpen = xbee.getCommandedTime(); //reset the commanded time to be open
     valve.millisWhenOpened = millis(); //set the time at open so we know when to close it
-    Serial.println(durationOpen);
     String str = "Valve commanded open for " + (String) durationOpen + " ms.";
     xbee.sendToGround(str);
     ledArmed.setStatus(LED_OPEN);
     if (HELIOS_DEBUG) Serial.println("Helios will open valve for " + (String)durationOpen + " milliseconds");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_DROP_NOW){
+    cutdown.state = open;
+    nichrome.startHeat();
+    cutdown.millisWhenOpened = millis();
+    String str = "Cutdown command heated for " + (String) durationHeated + " ms.";
+    xbee.sendToGround(str);
+    if (HELIOS_DEBUG) Serial.println("Helios will turn on nichrome for " + (String)durationHeated + " milliseconds.");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_ENABLE_VENT){
+    valve.state = armed; //reset all control variables to false to allow the valve to reopen
+    valve.numAltitudeChecks = 0;
+    String str = "Confirm valve enable: " + (String)durationOpen + " ms at " + minAltitudeToOpen + " m altitude.";
+    xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
+    ledArmed.setStatus(LED_ARMED); //indicates that the system is rearmed
+    if (HELIOS_DEBUG) Serial.println("Xbee command venting enabled.");
+  }else if (xbee.getLastCommand() == xbee.COMMAND_ENABLE_DROP){
+    cutdown.state = armed; //reset all control variables to false to allow the valve to reopen
+    cutdown.numAltitudeChecks = 0;
+    String str = "Confirm nichrome enable: " + (String)durationHeated + " ms at " + minAltitudeToDrop + " m altitude.";
+    xbee.sendToGround(str);  //send confirmation codes that contain the time and altitude at which the valve will open
+    if (HELIOS_DEBUG) Serial.println("Xbee command droping enabled.");
   }/*else if (xbee.getLastCommand() == xbee.COMMAND_SET_TIME){  //command to reset the amount of time to stay open
     durationOpen = xbee.getCommandedTime();
     xbee.sendConf(xbee.CONFIRM_CODE_SET_VAR, durationOpen); //send confirmation message confirming the time received
@@ -277,16 +296,21 @@ void xbeeCommand(){
   else if (xbee.getLastCommand() == xbee.COMMAND_TEST_OPEN){ //the next four commands are to control the payload without consideration of other code parameters
     actuator.openValve();
     valve.state = open;
+    valve.millisWhenOpened = millis() - durationOpen + 5000; // allows valve to stay open for five seconds
     // Fix this section so it stays open indefinitely
     String str = "Confirmed valve manually opened.";
     xbee.sendToGround(str);
+    if (HELIOS_DEBUG) Serial.println("xbee commanded manual opening");
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_CLOSE){
     actuator.closeValve();
+    valve.millisWhenOpened = 0;
     // Fix this section so it can close without becoming armed or disarmed
     xbee.sendToGround("Confirmed valve manually closed.");
+    if (HELIOS_DEBUG) Serial.println("xbee commanded manual closing");
   }else if (xbee.getLastCommand() == xbee.COMMAND_TEST_FWD){
     motor.startFan();
     xbee.sendToGround("Confirmed fan turned on forward.");
+    if (HELIOS_DEBUG) Serial.println("xbee commanded fan forward");
   }/*else if (xbee.getLastCommand() == xbee.COMMAND_TEST_REV){
     motor.reverseFan();
     xbee.sendConf(xbee.CONFIRM_CODE_TEST, xbee.CONFIRM_STATE_REV);
@@ -299,5 +323,15 @@ void xbeeCommand(){
         allData.honeywellAtmosphereData.pressure, allData.honeywellBalloonData.temperature, allData.honeywellAtmosphereData.temperature, actuator.position());
     if(HELIOS_DEBUG) Serial.println("xbee long data sent");
   }*/
+  else if (xbee.getLastCommand() == xbee.COMMAND_TEST_HEAT){
+    nichrome.startHeat();
+    cutdown.state = open;
+    cutdown.millisWhenOpened = millis() - durationHeated + 5000; // allows heat to stay for five seconds
+    xbee.sendToGround("Confirmed nichrome manually heated");
+    if (HELIOS_DEBUG) Serial.println("xbee commanded manual heating");
+  } else if (xbee.getLastCommand() == xbee.COMMAND_ERROR){
+    xbee.sendToGround("I didn't heat that correctly.");
+    if (HELIOS_DEBUG) Serial.println("xbee received unrecognized command");
+  }
   datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()));  //log whatever command was received to the datalog
 }

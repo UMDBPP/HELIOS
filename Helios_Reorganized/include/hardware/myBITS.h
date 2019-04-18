@@ -50,6 +50,7 @@ class myBITS{
     const static char PACKET_TEST_FWD[commandLength];
     const static char PACKET_ENABLE_VENT[commandLength];
     const static char PACKET_ENABLE_DROP[commandLength];
+    const static char PACKET_TEST_HEAT[commandLength];
 
     int processMessage(void);
     int lastCommand;
@@ -74,7 +75,8 @@ class myBITS{
     const static int COMMAND_TEST_OPEN = 7;
     const static int COMMAND_TEST_CLOSE = 8;
     const static int COMMAND_TEST_FWD = 9;
-    const static int COMMAND_ERROR = 10;
+    const static int COMMAND_TEST_HEAT = 10;
+    const static int COMMAND_ERROR = 11;
     const static int NO_PACKET = 100;
 
 };
