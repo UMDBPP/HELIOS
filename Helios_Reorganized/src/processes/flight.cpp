@@ -7,7 +7,7 @@
 #define PRESET_ALTITUDE_MIN_DROP 24380
 #define PRESET_ALTITUDE_MAX_DROP 37000
 #define PRESET_DURATION_HEAT 4.0*60*1000
-#define TIMER_MIN_DROP 90.0*60*1000
+#define TIMER_MIN_DROP 40.0*60*1000   //90.0*60*1000
 
 #define NUM_OF_CHECKS_BEFORE_DROP 40
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
@@ -216,6 +216,10 @@ void lFlight() {
       if((allData.gpsData.altitude > minAltitudeToDrop && allData.gpsData.altitude < maxAltitudeToDrop) || (extSwitch.isOnActive() && (millis() - extSwitch.timerOnStartTime()) > TIMER_MIN_DROP)){
         // if the altitude is in range or if the switch registers being toggled and the timer has exceeded the time limit
         cutdown.numAltitudeChecks++;
+
+
+        //FOR THERMAL TEST ONLY!!!!
+        valve.numAltitudeChecks++;
       }
     }
     if(cutdown.numAltitudeChecks >= NUM_OF_CHECKS_BEFORE_DROP && cutdown.state == armed){
