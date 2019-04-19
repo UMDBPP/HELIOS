@@ -8,6 +8,7 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
     oldAltitude = allData.gpsData.altitude;
     logsCounter = 0;
   }*/
+  static unsigned long lastPrint = millis();
 
   String dataString = "";
   dataString += (String)millis() + ",";
@@ -72,6 +73,10 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   dataString += (String)cutdown.numAltitudeChecks;
 
   datalog.write(dataString);
+  if (millis() - lastPrint > PRINT_FREQUENCY){
+    lastPrint = millis();
+    if (HELIOS_DEBUG) Serial.println(dataString);
+  }
 }
 
 int availableMemory() {

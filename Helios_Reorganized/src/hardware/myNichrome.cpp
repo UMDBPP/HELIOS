@@ -9,10 +9,12 @@ void myNichrome::initialize(){
 
 void myNichrome::startHeat(){
   digitalWrite(PIN, HIGH);
-  if (HELIOS_DEBUG) Serial.println("Nichrome has been turned on.");
+  if (HELIOS_DEBUG && state != HIGH) Serial.println("Nichrome has been turned on.");
+  state = HIGH;
 }
 
 void myNichrome::endHeat(){
   digitalWrite(PIN, LOW);
-  if (HELIOS_DEBUG) Serial.println("Nichrome has been turned off.");
+  if (HELIOS_DEBUG && state != LOW) Serial.println("Nichrome has been turned off.");
+  state = LOW;
 }

@@ -20,7 +20,8 @@ boolean myActuator::openValve(void){//opens the valve by retracting the piston
   digitalWrite(PIN_ACTUATOR_A, HIGH);
   digitalWrite(PIN_ACTUATOR_B, LOW);
   digitalWrite(PIN_ACTUATOR_PWM, HIGH);
-  if (HELIOS_DEBUG) Serial.println("Valve Opening");
+  if (HELIOS_DEBUG && state != HIGH) Serial.println("Valve Opening");
+  state = HIGH;
   return OPEN;
 }
 
@@ -28,7 +29,8 @@ boolean myActuator::closeValve(void){//closes the valve by extending the piston
   digitalWrite(PIN_ACTUATOR_A, LOW);
   digitalWrite(PIN_ACTUATOR_B, HIGH);
   digitalWrite(PIN_ACTUATOR_PWM, HIGH);
-  if (HELIOS_DEBUG) Serial.println("Valve Closing");
+  if (HELIOS_DEBUG && state != LOW) Serial.println("Valve Closing");
+  state = LOW;
   return CLOSED;
 }
 

@@ -7,6 +7,7 @@
 
 class myNichrome{
   private:
+    int state=2;
     const static int PIN = NICHROME_PIN;
   public:
     void initialize();
