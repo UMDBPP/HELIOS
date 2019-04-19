@@ -68,7 +68,7 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   //dataString += (String)ascentVelocity + ",";
   dataString += (String)actPosition + ",";
   dataString += (String)valve.state + ",";
-  dataString += (String)valve.numAltitudeChecks;
+  dataString += (String)valve.numAltitudeChecks + ",";
   dataString += (String)cutdown.state + ",";
   dataString += (String)cutdown.numAltitudeChecks;
 
