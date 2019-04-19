@@ -10,7 +10,7 @@ void mySwitch::initialize(void){
 }
 
 bool mySwitch::getStatus(void){
-  checkStatus();
+  checkStatus(NULL);
   return (lastState == LOW);
 }
 
@@ -25,13 +25,17 @@ unsigned long mySwitch::timerOffStartTime(void){
 bool mySwitch::isOnActive(void){ return timerOnActive; }
 bool mySwitch::isOffActive(void){ return timerOffActive; }
 
-void mySwitch::checkStatus(void){
+void mySwitch::checkStatus(myBITS* xbee){
   int newState = digitalRead(pin);
   if (newState != lastState){
     if (newState == LOW){ //The switch is on if it reads low
       timeFlippedOn = millis();
       timerOnActive = 1;
       if (HELIOS_DEBUG) Serial.println("Switch has been toggled to ON at: " + (String)timeFlippedOn + " ms");
+      if (xbee){
+        String str = "Started timer: " + (String)allData.gpsData.hour + ":" + (String)allData.gpsData.minute + ":" + (String)allData.gpsData.second + ".";
+        xbee->sendToGround(str);
+      }
     } else{
       timeFlippedOff = millis();
       timerOffActive = 1;

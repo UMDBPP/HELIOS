@@ -4,6 +4,8 @@
 
 #include "Arduino.h"
 #include "../../myPins.h"
+#include "myBITS.h"
+#include "../processes/data.h"
 
 class mySwitch{
   private:
@@ -18,7 +20,7 @@ class mySwitch{
     mySwitch(int);
     void initialize(void);
     bool getStatus(void);
-    void checkStatus(void);
+    void checkStatus(myBITS*);
     unsigned long timerOnStartTime(void);
     unsigned long timerOffStartTime(void); //not yet sure what this would be used for
     bool isOnActive(void);

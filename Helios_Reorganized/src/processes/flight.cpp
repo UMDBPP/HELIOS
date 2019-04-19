@@ -215,7 +215,7 @@ void lFlight() {
 
   if(cutdown.state != disarmed){
     if (checkAltThisLoop){
-      extSwitch.checkStatus();
+      extSwitch.checkStatus(&xbee);
       if((allData.gpsData.altitude > minAltitudeToDrop && allData.gpsData.altitude < maxAltitudeToDrop) || (extSwitch.isOnActive() && (millis() - extSwitch.timerOnStartTime()) > TIMER_MIN_DROP)){
         // if the altitude is in range or if the switch registers being toggled and the timer has exceeded the time limit
         cutdown.numAltitudeChecks++;
