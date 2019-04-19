@@ -204,6 +204,7 @@ void lFlight() {
       //motor.startFan();
       valve.millisWhenOpened = millis(); //set the time at open so we know when to close the valve
       ledArmed.setStatus(LED_OPEN); //red means that the valve is currently open
+      xbee.sendToGround("Valve auto-opened at:" + (String)allData.gpsData.altitude + " m.");
     }
     else if(valve.state == open && millis() > (valve.millisWhenOpened + durationOpen)){//if we've been open long enough
       valve.state = disarmed;
@@ -227,6 +228,7 @@ void lFlight() {
     if(cutdown.numAltitudeChecks >= NUM_OF_CHECKS_BEFORE_DROP && cutdown.state == armed){
       cutdown.state = open;
       cutdown.millisWhenOpened = millis();
+      xbee.sendToGround("Cutdown auto-heated at:" + (String)allData.gpsData.altitude + " m.");
     }
     else if(cutdown.state == open && millis() > (cutdown.millisWhenOpened + durationHeated)){
       cutdown.state = disarmed;
