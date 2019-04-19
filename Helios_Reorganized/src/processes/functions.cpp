@@ -70,7 +70,9 @@ void logData(const myDatalog &datalog, const myData &allData, const valveState &
   dataString += (String)valve.state + ",";
   dataString += (String)valve.numAltitudeChecks + ",";
   dataString += (String)cutdown.state + ",";
-  dataString += (String)cutdown.numAltitudeChecks;
+  dataString += (String)cutdown.numAltitudeChecks + ",";
+  dataString += (String)allData.xbeeLastCommand + ",";
+  dataString += (String)allData.xbeeLastTime;
 
   datalog.write(dataString);
   if (millis() - lastPrint > PRINT_FREQUENCY){

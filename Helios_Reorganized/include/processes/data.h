@@ -22,6 +22,8 @@ struct myData{
   myHoneywellData honeywellAtmosphereData;
   myBMEData bmeBalloonData;
   myBMEData bmeAtmosphereData;
+  int xbeeLastCommand = 1000;
+  unsigned long xbeeLastTime = 0;
 };
 extern myData allData;
 

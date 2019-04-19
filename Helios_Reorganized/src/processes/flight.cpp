@@ -168,6 +168,8 @@ void lFlight() {
   
   if(xbee.checkForMessage() != xbee.NO_PACKET && (millis() - millisLastCommandReceived) > xbee.WAIT_TIME_AFTER_COMMAND){ //if the xbee does receive a command
     xbeeCommand();  //exectue separate function that handles the command
+    allData.xbeeLastCommand = xbee.getLastCommand();
+    allData.xbeeLastTime = millis();
     millisLastCommandReceived = millis(); //set the time at which the last command was received to prevent duplicates
   }
 
@@ -337,5 +339,5 @@ void xbeeCommand(){
     xbee.sendToGround("I didn't heat that correctly.");
     if (HELIOS_DEBUG) Serial.println("xbee received unrecognized command");
   }
-  datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()));  //log whatever command was received to the datalog
+  //datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()));  //log whatever command was received to the datalog
 }
