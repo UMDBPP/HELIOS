@@ -7,7 +7,7 @@
 #define PRESET_ALTITUDE_MIN_DROP 24380
 #define PRESET_ALTITUDE_MAX_DROP 37000
 #define PRESET_DURATION_HEAT 3.0*60*1000
-#define TIMER_MIN_DROP 80.0*60*1000
+#define TIMER_MIN_DROP 83.0*60*1000
 
 #define NUM_OF_CHECKS_BEFORE_DROP 40
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
