@@ -6,8 +6,8 @@
 
 #define PRESET_ALTITUDE_MIN_DROP 24380
 #define PRESET_ALTITUDE_MAX_DROP 37000
-#define PRESET_DURATION_HEAT 2.0*60*1000
-#define TIMER_MIN_DROP 40.0*60*1000   //90.0*60*1000
+#define PRESET_DURATION_HEAT 3.0*60*1000
+#define TIMER_MIN_DROP 80.0*60*1000
 
 #define NUM_OF_CHECKS_BEFORE_DROP 40
 #define NUM_OF_CHECKS_BEFORE_OPEN 40 //the number of times the GPS must confirm altitude to open the valve
@@ -222,7 +222,7 @@ void lFlight() {
 
 
         //FOR THERMAL TEST ONLY!!!!
-        valve.numAltitudeChecks++;
+        //valve.numAltitudeChecks++;
       }
     }
     if(cutdown.numAltitudeChecks >= NUM_OF_CHECKS_BEFORE_DROP && cutdown.state == armed){
@@ -338,7 +338,7 @@ void xbeeCommand(){
     xbee.sendToGround("Confirmed nichrome manually heated");
     if (HELIOS_DEBUG) Serial.println("xbee commanded manual heating");
   } else if (xbee.getLastCommand() == xbee.COMMAND_ERROR){
-    xbee.sendToGround("I didn't hear that correctly.");
+    //xbee.sendToGround("I didn't hear that correctly.");
     if (HELIOS_DEBUG) Serial.println("xbee received unrecognized command");
   }
   //datalog.write("XBEE COMMAND RECEIVED: " + (String)(xbee.getLastCommand()));  //log whatever command was received to the datalog

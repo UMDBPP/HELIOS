@@ -16,17 +16,22 @@ void myGPS::recordGPS(myGPSData *gpsData){  //save current data to the structure
   gpsData->month = GPS.month;
   gpsData->year = 2000+GPS.year;
   gpsData->fix = GPS.fix;
-  if(GPS.fix){  //only save location data if we have a fix
-    gpsData->latitude_deg = GPS.latitude/100;
-    gpsData->latitude_min = GPS.latitude - 100*gpsData->latitude_deg;
-    gpsData->latitude_dir = GPS.lat;
-    gpsData->longitude_deg = GPS.longitude/100;
-    gpsData->longitude_min = GPS.longitude - 100*gpsData->longitude_deg;
-    gpsData->longitude_dir = GPS.lon;
-    gpsData->velocity = GPS.speed;
-    gpsData->angle = GPS.angle;
-    gpsData->altitude = GPS.altitude;
-    gpsData->satellites = GPS.satellites;
+  if (GPS.newNMEAreceived()) {  //if there is new data, try to parse it
+    if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
+      ; // we can fail to parse a sentence in which case we should just wait for another 
+    
+    if(GPS.fix){  //only save location data if we have a fix
+      gpsData->latitude_deg = GPS.latitude/100;
+      gpsData->latitude_min = GPS.latitude - 100*gpsData->latitude_deg;
+      gpsData->latitude_dir = GPS.lat;
+      gpsData->longitude_deg = GPS.longitude/100;
+      gpsData->longitude_min = GPS.longitude - 100*gpsData->longitude_deg;
+      gpsData->longitude_dir = GPS.lon;
+      gpsData->velocity = GPS.speed;
+      gpsData->angle = GPS.angle;
+      gpsData->altitude = GPS.altitude;
+      gpsData->satellites = GPS.satellites;
+    }
   }
 }
 
@@ -47,11 +52,7 @@ void myGPS::read(myGPSData *gpsData){ //function to read data and save it to the
   char c = GPS.read();  //read the gps
   if (GPSECHO)  //echo the raw data if true
     if (c) Serial.println(c);
-  if (GPS.newNMEAreceived()) {  //if there is new data, try to parse it
-    if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
-      ; // we can fail to parse a sentence in which case we should just wait for another
-    recordGPS(gpsData);  //if there is new data we will record it, if not, this will simply write the old data again
-  }
+  recordGPS(gpsData);  //if there is new data we will record it, if not, this will simply write the old data again
   return;
 }
 

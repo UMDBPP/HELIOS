@@ -15,8 +15,8 @@ class myBITS{
     XBeeResponse response;
 
     //last 32 bits of the xbee address, varies by target
-    //const uint32_t BitsSL = 0x417B4A3B; // address of BITS, this is the only address we care about
-    const uint32_t BitsSL = 0x417B4A36; //not real
+    const uint32_t BitsSL = 0x417B4A3B; // address of BITS, this is the only address we care about
+    //const uint32_t BitsSL = 0x417B4A36; // address of the ground station
     //const uint32_t MarsSL = 0x417B4A3A; // address of Mars, should not be used
     //const uint32_t GroundSL = 0x417B4A36; // address of the ground station, should not be used
 
@@ -55,11 +55,12 @@ class myBITS{
     int processMessage(void);
     int lastCommand;
 
+    bool sendToGround(char*,uint8_t); //sends a character array to ground
+
   public:
     int initialize();
 
     bool sendToGround(String);
-    bool sendToGround(char*,uint8_t); //sends a character array to ground
     int checkForMessage(void); //checks for messages and if so, calls processMessage
     int getLastCommand(void){return lastCommand;}
 

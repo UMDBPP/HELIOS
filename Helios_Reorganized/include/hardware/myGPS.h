@@ -22,10 +22,10 @@ struct myGPSData{ //Data structure for storing gps info
   byte fix;
   uint8_t latitude_deg;//degrees
   float latitude_min;//decimal minutes
-  char latitude_dir;//N/S
+  char latitude_dir='U';//N/S
   uint8_t longitude_deg;
   float longitude_min;
-  char longitude_dir;//W/E
+  char longitude_dir='U';//W/E
   float velocity;//knots
   float angle;//direction gps thinks we're moving
   int32_t altitude=11;//meters

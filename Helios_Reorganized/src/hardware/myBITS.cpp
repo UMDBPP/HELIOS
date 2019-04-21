@@ -25,12 +25,12 @@ bool myBITS::sendToGround(String message){
   memset(xbeeSendBuf, 0, xbeeSendBufSize);
   if (length <= xbeeSendBufSize){
     message.toCharArray(xbeeSendBuf, length);
-    return sendToGround(xbeeSendBuf, length);
+    return sendToGround(xbeeSendBufFull, length+offsetSize);
   } else {
     if (HELIOS_DEBUG) Serial.println("Warning: Message exceeds size that can be sent. Message trimmed.");
     message.toCharArray(xbeeSendBuf, xbeeSendBufSize-1);
     xbeeSendBuf[xbeeSendBufSize-1] = '\0';
-    return sendToGround(xbeeSendBuf, xbeeSendBufSize);
+    return sendToGround(xbeeSendBufFull, xbeeSendBufSizeFull);
   }
 }
 
